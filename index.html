@@ -3,500 +3,401 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fanzora Fantasy Sports</title>
-
+  <title>Fanzora - Fantasy Football Platform</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
     body {
-      font-family: 'Poppins', sans-serif;
-      background: #121212;
-      color: #eee;
+      background-color: #121212;
+      color: #00ff7f;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      user-select: none;
     }
-
-    #auth-section, #main-app {
-      max-width: 600px;
-      width: 100%;
-      background: #1e1e1e;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-    }
-
-    h1, h2 {
-      font-weight: 600;
-      margin-bottom: 15px;
-      color: #00ff7f;
-    }
-
-    label {
-      margin-top: 15px;
-      font-weight: 600;
-      color: #aaa;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px 15px;
-      border-radius: 8px;
+    input, button, select {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 10px;
       border: none;
-      background: #2a2a2a;
-      color: #eee;
       font-size: 1rem;
-      transition: background 0.3s ease;
+      font-weight: 600;
     }
-
-    input:focus, select:focus {
-      outline: none;
-      background: #3c3c3c;
-    }
-
     button {
-      margin-top: 25px;
-      width: 100%;
-      padding: 15px;
-      background: #00ff7f;
-      border: none;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 1.1rem;
+      background-color: #00ff7f;
       color: #121212;
       cursor: pointer;
       transition: background 0.3s ease;
     }
-
     button:hover {
-      background: #00cc66;
+      background-color: #00cc66;
     }
-
-    #scores-container, #leaderboard-section {
-      margin-top: 25px;
+    #login-section, #main-app {
+      max-width: 700px;
+      margin: auto;
     }
-
+    #scores-container {
+      margin-top: 20px;
+    }
     .score-card {
-      background: #2a2a2a;
-      border-radius: 10px;
-      padding: 15px 20px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    .score-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 18px rgba(0,255,127,0.7);
-    }
-
-    #leaderboard-section {
       background: #222;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px #00ff7faa;
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #00ff7f33;
     }
-
-    #leaderboard-list {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    #leaderboard-list li {
-      padding: 10px 0;
-      border-bottom: 1px solid #444;
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: #00ff7f;
-      transition: color 0.3s ease;
-    }
-
-    #leaderboard-list li:hover {
-      color: #00cc66;
-    }
-
-    #auth-message {
-      color: #ff5555;
+    .score-card button {
       margin-top: 10px;
-      font-weight: 600;
-      min-height: 20px;
     }
-
-    /* Contest Section CSS */
-    #contest-section {
-      background: #1f1f1f;
-      padding: 20px;
-      border-radius: 12px;
+    #leaderboard {
+      margin-top: 40px;
+    }
+    #leaderboard table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #leaderboard th, #leaderboard td {
+      border: 1px solid #00ff7f44;
+      padding: 8px;
+      text-align: center;
+    }
+    #contests-section {
+      margin-top: 40px;
+      background: #222;
+      padding: 15px;
+      border-radius: 15px;
+    }
+    /* Player profiles section */
+    #player-profiles-section {
+      display: none;
       margin-top: 30px;
-      box-shadow: 0 0 15px #00ff7faa;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
-
-    #contest-list {
-      list-style-type: none;
-      padding-left: 0;
-      max-height: 200px;
-      overflow-y: auto;
+    #players-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
     }
-
-    #contest-list li {
+    .player-card {
+      background: #2a2a2a;
       padding: 10px;
-      border-bottom: 1px solid #444;
+      border-radius: 12px;
+      width: 120px;
       cursor: pointer;
+      text-align: center;
       color: #00ff7f;
       transition: background 0.3s ease;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      user-select: none;
     }
-
-    #contest-list li:hover {
+    .player-card:hover {
       background: #007f3f44;
     }
-
-    .join-btn {
-      background: #007bff;
+    #player-details {
+      color: #eee;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      display: none;
+    }
+    #close-player-details {
+      margin-top: 10px;
+      display: none;
+      padding: 10px 15px;
+      border-radius: 10px;
       border: none;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
+      background: #00ff7f;
+      color: #121212;
       font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .join-btn:hover {
-      background: #0056b3;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      #auth-section, #main-app {
-        padding: 20px;
-      }
-
-      button {
-        font-size: 1rem;
-        padding: 12px;
-      }
+      cursor: pointer;
+      user-select: none;
     }
   </style>
 </head>
 <body>
-
-  <section id="auth-section">
+  <div id="login-section">
     <h1>Welcome to Fanzora</h1>
-    <form id="auth-form">
-      <label for="username">Username:</label>
-      <input type="text" id="username" required />
-      <label for="birthdate">Date of Birth:</label>
-      <input type="date" id="birthdate" required />
-      <button type="submit">Enter</button>
-      <p id="auth-message"></p>
-    </form>
-  </section>
+    <p>Please enter your username and age to continue:</p>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="number" id="age" placeholder="Age" min="1" />
+    <button onclick="login()">Login</button>
+    <p id="login-error" style="color:#f44336; font-weight:700;"></p>
+  </div>
 
   <section id="main-app" style="display:none;">
-    <button onclick="logout()">Logout</button>
-    <h1>Live Football Scores & Fantasy Points</h1>
+    <h2>Welcome, <span id="user-display"></span></h2>
 
-    <label for="league-select">Filter by League:</label>
-    <select id="league-select">
-      <option value="all">All Leagues</option>
-      <option value="140">La Liga</option>
-      <option value="2">Champions League</option>
-      <option value="39">Premier League</option>
-    </select>
+    <div id="scores-container">
+      <!-- Live scores will load here -->
+    </div>
 
-    <button onclick="loadLiveScores()">Load Live Scores</button>
-    <div id="scores-container"></div>
-
-    <section id="leaderboard-section" style="display:none;">
-      <h2>Leaderboard</h2>
-      <ul id="leaderboard-list"></ul>
+    <!-- Player profiles section -->
+    <section id="player-profiles-section">
+      <h2>Player Profiles & Stats</h2>
+      <div id="players-list"></div>
+      <div id="player-details"></div>
+      <button id="close-player-details" onclick="closePlayerDetails()">Close Player Details</button>
     </section>
 
-    <!-- Contest Section -->
-    <section id="contest-section">
-      <h2>Contests</h2>
+    <section id="leaderboard">
+      <h2>Leaderboard</h2>
+      <table>
+        <thead>
+          <tr><th>User</th><th>Points</th></tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+    </section>
 
-      <div id="create-contest">
-        <h3>Create a Contest</h3>
-        <input type="text" id="contest-name" placeholder="Contest Name" />
-        <input type="number" id="contest-fee" placeholder="Entry Fee (USD)" min="0" />
-        <button onclick="createContest()">Create Contest</button>
-        <p id="contest-message"></p>
-      </div>
+    <section id="contests-section">
+      <h2>Create Contest</h2>
+      <input type="text" id="contest-name" placeholder="Contest Name" />
+      <input type="number" id="contest-entry" placeholder="Entry Fee (USD)" />
+      <button onclick="createContest()">Create Contest</button>
 
-      <div id="available-contests">
-        <h3>Available Contests</h3>
-        <ul id="contest-list"></ul>
-      </div>
+      <h2>Join Contest</h2>
+      <input type="text" id="join-contest-name" placeholder="Contest Name" />
+      <button onclick="joinContest()">Join Contest</button>
+
+      <div id="contest-message" style="margin-top:15px; font-weight:700;"></div>
     </section>
   </section>
 
   <script>
-    // AUTH SYSTEM
-    window.onload = () => {
-      const user = localStorage.getItem("fanzoraUser");
-      if (user) {
-        showApp();
-        loadLiveScores("all");
+    const API_KEY = 'db2d688e15mshc5c4628851de414p19f157jsnbbdea597f1b8';
+    let currentUser = null;
+
+    function login() {
+      const username = document.getElementById('username').value.trim();
+      const age = parseInt(document.getElementById('age').value);
+      const errorEl = document.getElementById('login-error');
+
+      if (!username) {
+        errorEl.textContent = "Username is required.";
+        return;
       }
+      if (!age || age < 18) {
+        errorEl.textContent = "You must be at least 18 years old to use this platform.";
+        return;
+      }
+      errorEl.textContent = "";
+      currentUser = { username, age };
+      localStorage.setItem('fanzoraUser', JSON.stringify(currentUser));
 
-      document.getElementById("auth-form").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const username = document.getElementById("username").value.trim();
-        const birthdate = new Date(document.getElementById("birthdate").value);
-        const today = new Date();
-        let age = today.getFullYear() - birthdate.getFullYear();
-        const monthDiff = today.getMonth() - birthdate.getMonth();
-        const dayDiff = today.getDate() - birthdate.getDate();
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      document.getElementById('user-display').textContent = username;
 
-        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-          age--;
-        }
-
-        if (age < 18) {
-          document.getElementById("auth-message").innerText = "You must be at least 18 years old to use Fanzora.";
-          return;
-        }
-
-        localStorage.setItem("fanzoraUser", username);
-        showApp();
-        loadLiveScores("all");
-      });
-
-      document.getElementById("league-select").addEventListener("change", (e) => {
-        loadLiveScores(e.target.value);
-      });
-    };
-
-    function showApp() {
-      document.getElementById("auth-section").style.display = "none";
-      document.getElementById("main-app").style.display = "block";
-      loadLiveScores("all");
-      renderContests();
+      loadLiveScores();
+      loadLeaderboard();
     }
 
-    function logout() {
-      localStorage.removeItem("fanzoraUser");
-      location.reload();
-    }
-
-    // LEADERBOARD FUNCTIONS
-    function updateLeaderboard(username, points) {
-      let leaderboard = JSON.parse(localStorage.getItem("fanzoraLeaderboard")) || {};
-      leaderboard[username] = (leaderboard[username] || 0) + points;
-      localStorage.setItem("fanzoraLeaderboard", JSON.stringify(leaderboard));
-    }
-
-    function showLeaderboard() {
-      const leaderboardSection = document.getElementById("leaderboard-section");
-      const list = document.getElementById("leaderboard-list");
-      leaderboardSection.style.display = "block";
-
-      let leaderboard = JSON.parse(localStorage.getItem("fanzoraLeaderboard")) || {};
-      let sorted = Object.entries(leaderboard).sort((a,b) => b[1] - a[1]);
-
-      list.innerHTML = "";
-      sorted.forEach(([user, pts]) => {
-        let li = document.createElement("li");
-        li.textContent = `${user}: ${pts.toFixed(1)} pts`;
-        list.appendChild(li);
-      });
-    }
-
-    // LOAD LIVE SCORES WITH FANTASY POINTS AND LEAGUE FILTERING
-    async function loadLiveScores(leagueId = "all") {
+    // Load live football scores from API-Football
+    async function loadLiveScores() {
       const container = document.getElementById("scores-container");
-      container.innerHTML = "<p>Loading live matches and fantasy points...</p>";
+      container.innerHTML = "<p>Loading live scores...</p>";
 
       const options = {
         method: 'GET',
         headers: {
-          'X-RapidAPI-Key': 'db2d688e15mshc5c4628851de414p19f157jsnbbdea597f1b8',
+          'X-RapidAPI-Key': API_KEY,
           'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
         }
       };
 
       try {
-        const res = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all', options);
-        const data = await res.json();
+        // Load matches from Premier League, La Liga, Champions League (league IDs example)
+        const leagueIds = [39, 140, 2]; // PL, La Liga, UCL league IDs in API-Football
+        let allMatches = [];
 
-        if (!data.response || data.response.length === 0) {
-          container.innerHTML = "<p>No live matches right now.</p>";
-          return;
-        }
-
-        let matches = data.response;
-        if (leagueId !== "all") {
-          matches = matches.filter(match => match.league.id.toString() === leagueId);
-        }
-
-        if (matches.length === 0) {
-          container.innerHTML = `<p>No live matches for the selected league.</p>`;
-          return;
-        }
-
-        container.innerHTML = '';
-        const username = localStorage.getItem("fanzoraUser") || "Guest";
-
-        for (const match of matches) {
-          let homePoints = 0;
-          let awayPoints = 0;
-
-          try {
-            const statsRes = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures/players?fixture=${match.fixture.id}`, options);
-            const statsData = await statsRes.json();
-
-            if (statsData.response && statsData.response.length > 0) {
-              statsData.response.forEach(player => {
-                player.statistics.forEach(stat => {
-                  const goals = stat.goals.total || 0;
-                  const assists = stat.goals.assists || 0;
-                  const yellow = stat.cards.yellow || 0;
-
-                  const points = (goals * 5) + (assists * 3) - (yellow * 1);
-
-                  if (player.team.id === match.teams.home.id) homePoints += points;
-                  else if (player.team.id === match.teams.away.id) awayPoints += points;
-                });
-              });
-            }
-          } catch (e) {
-            homePoints = 0;
-            awayPoints = 0;
+        for (const leagueId of leagueIds) {
+          const res = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures?league=${leagueId}&season=2024&live=all`, options);
+          const data = await res.json();
+          if (data.response) {
+            allMatches = allMatches.concat(data.response);
           }
+        }
 
-          updateLeaderboard(username, homePoints + awayPoints);
+        if (allMatches.length === 0) {
+          container.innerHTML = "<p>No live matches currently.</p>";
+          return;
+        }
+
+        container.innerHTML = "";
+        allMatches.forEach(match => {
+          // Example fantasy points (you can improve this formula)
+          const homePoints = (match.goals.home || 0) * 3;
+          const awayPoints = (match.goals.away || 0) * 3;
 
           const card = document.createElement("div");
           card.className = "score-card";
           card.innerHTML = `
-            <strong>${match.teams.home.name}</strong> ${match.goals.home} - ${match.goals.away} <strong>${match.teams.away.name}</strong><br>
+            <strong>${match.teams.home.name}</strong> ${match.goals.home ?? 0} - ${match.goals.away ?? 0} <strong>${match.teams.away.name}</strong><br>
             <small>${match.league.name} – ${match.fixture.status.short}</small><br>
-            <em>Fantasy Points: ${homePoints.toFixed(1)} - ${awayPoints.toFixed(1)}</em>
+            <em>Fantasy Points: ${homePoints.toFixed(1)} - ${awayPoints.toFixed(1)}</em><br>
+            <button onclick="showPlayers(${match.fixture.id})">View Players & Stats</button>
           `;
           container.appendChild(card);
-        }
-
-        showLeaderboard();
-
+        });
       } catch (err) {
-        container.innerHTML = `<p>Error loading scores. Try again later.</p>`;
+        container.innerHTML = "<p>Error loading live scores.</p>";
         console.error(err);
       }
     }
 
-    // Contest Functions
+    // Leaderboard (simple from localStorage)
+    function loadLeaderboard() {
+      const leaderboardBody = document.getElementById('leaderboard-body');
+      const leaderboard = JSON.parse(localStorage.getItem('fanzoraLeaderboard') || '{}');
+      leaderboardBody.innerHTML = '';
 
-    // Create a contest
-    function createContest() {
-      const name = document.getElementById("contest-name").value.trim();
-      const fee = parseFloat(document.getElementById("contest-fee").value);
-      const message = document.getElementById("contest-message");
-      message.style.color = "#ff5555";
-
-      if (!name) {
-        message.innerText = "Please enter a contest name.";
-        return;
-      }
-      if (isNaN(fee) || fee < 0) {
-        message.innerText = "Please enter a valid entry fee.";
+      // Convert object to array and sort descending by points
+      const sorted = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
+      if (sorted.length === 0) {
+        leaderboardBody.innerHTML = '<tr><td colspan="2">No data yet</td></tr>';
         return;
       }
 
-      let contests = JSON.parse(localStorage.getItem("fanzoraContests")) || [];
-
-      // Check for duplicate names
-      if (contests.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-        message.innerText = "A contest with this name already exists.";
-        return;
-      }
-
-      const newContest = {
-        id: Date.now().toString(),
-        name,
-        fee,
-        participants: []
-      };
-
-      contests.push(newContest);
-      localStorage.setItem("fanzoraContests", JSON.stringify(contests));
-
-      message.style.color = "#00ff7f";
-      message.innerText = `Contest "${name}" created!`;
-      document.getElementById("contest-name").value = "";
-      document.getElementById("contest-fee").value = "";
-
-      renderContests();
-    }
-
-    // Render contests list
-    function renderContests() {
-      const list = document.getElementById("contest-list");
-      list.innerHTML = "";
-
-      const contests = JSON.parse(localStorage.getItem("fanzoraContests")) || [];
-      const username = localStorage.getItem("fanzoraUser") || "Guest";
-
-      if (contests.length === 0) {
-        list.innerHTML = "<li>No contests available.</li>";
-        return;
-      }
-
-      contests.forEach(contest => {
-        const li = document.createElement("li");
-        li.textContent = `${contest.name} - Entry Fee: $${contest.fee.toFixed(2)} - Participants: ${contest.participants.length}`;
-
-        // Add join button if user not joined yet
-        if (!contest.participants.includes(username)) {
-          const joinBtn = document.createElement("button");
-          joinBtn.className = "join-btn";
-          joinBtn.textContent = "Join";
-          joinBtn.onclick = () => joinContest(contest.id);
-          li.appendChild(joinBtn);
-        } else {
-          const joinedTag = document.createElement("span");
-          joinedTag.style.color = "#00ff7f";
-          joinedTag.style.fontWeight = "700";
-          joinedTag.style.marginLeft = "10px";
-          joinedTag.textContent = "Joined";
-          li.appendChild(joinedTag);
-        }
-
-        list.appendChild(li);
+      sorted.forEach(([user, points]) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${user}</td><td>${points}</td>`;
+        leaderboardBody.appendChild(tr);
       });
     }
 
-    // Join contest function
-    function joinContest(contestId) {
-      const username = localStorage.getItem("fanzoraUser") || "Guest";
-      let contests = JSON.parse(localStorage.getItem("fanzoraContests")) || [];
-
-      const contestIndex = contests.findIndex(c => c.id === contestId);
-      if (contestIndex === -1) return alert("Contest not found.");
-
-      if (contests[contestIndex].participants.includes(username)) {
-        return alert("You already joined this contest.");
+    // Create contest
+    function createContest() {
+      const name = document.getElementById('contest-name').value.trim();
+      const entry = parseFloat(document.getElementById('contest-entry').value);
+      const message = document.getElementById('contest-message');
+      if (!name || isNaN(entry) || entry <= 0) {
+        message.textContent = "Please enter valid contest name and entry fee.";
+        return;
       }
+      let contests = JSON.parse(localStorage.getItem('fanzoraContests') || '{}');
+      if (contests[name]) {
+        message.textContent = "Contest name already exists.";
+        return;
+      }
+      contests[name] = { entryFee: entry, players: [] };
+      localStorage.setItem('fanzoraContests', JSON.stringify(contests));
+      message.textContent = `Contest "${name}" created successfully.`;
+      document.getElementById('contest-name').value = '';
+      document.getElementById('contest-entry').value = '';
+    }
 
-      contests[contestIndex].participants.push(username);
-      localStorage.setItem("fanzoraContests", JSON.stringify(contests));
+    // Join contest
+    function joinContest() {
+      const name = document.getElementById('join-contest-name').value.trim();
+      const message = document.getElementById('contest-message');
+      let contests = JSON.parse(localStorage.getItem('fanzoraContests') || '{}');
+      if (!contests[name]) {
+        message.textContent = "Contest not found.";
+        return;
+      }
+      if (contests[name].players.includes(currentUser.username)) {
+        message.textContent = "You already joined this contest.";
+        return;
+      }
+      contests[name].players.push(currentUser.username);
+      localStorage.setItem('fanzoraContests', JSON.stringify(contests));
+      message.textContent = `You joined contest "${name}" successfully.`;
+      document.getElementById('join-contest-name').value = '';
+    }
 
-      alert(`You joined "${contests[contestIndex].name}"!`);
-      renderContests();
+    // Show players for a selected fixture
+    async function showPlayers(fixtureId) {
+      const playersSection = document.getElementById("player-profiles-section");
+      const playersList = document.getElementById("players-list");
+      const playerDetails = document.getElementById("player-details");
+      const closeBtn = document.getElementById("close-player-details");
+
+      playersSection.style.display = "block";
+      playerDetails.style.display = "none";
+      closeBtn.style.display = "none";
+      playersList.innerHTML = "<p>Loading players...</p>";
+
+      const options = {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': API_KEY,
+          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+        }
+      };
+
+      try {
+        const res = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures/players?fixture=${fixtureId}`, options);
+        const data = await res.json();
+
+        if (!data.response || data.response.length === 0) {
+          playersList.innerHTML = "<p>No player data available for this match.</p>";
+          return;
+        }
+
+        playersList.innerHTML = "";
+        // data.response is array of teams players, e.g. [homeTeamPlayers, awayTeamPlayers]
+        data.response.forEach(teamPlayers => {
+          teamPlayers.players.forEach(player => {
+            const card = document.createElement("div");
+            card.className = "player-card";
+            card.textContent = player.player.name;
+            card.onclick = () => showPlayerDetails(player);
+            playersList.appendChild(card);
+          });
+        });
+
+        closeBtn.style.display = "inline-block";
+
+      } catch (err) {
+        playersList.innerHTML = "<p>Error loading players.</p>";
+        console.error(err);
+      }
+    }
+
+    // Show detailed player stats
+    function showPlayerDetails(player) {
+      const details = document.getElementById("player-details");
+      const stats = player.statistics[0] || {};
+
+      details.style.display = "block";
+      details.innerHTML = `
+        <h3>${player.player.name}</h3>
+        <p><strong>Position:</strong> ${player.player.pos || 'N/A'}</p>
+        <p><strong>Number:</strong> ${player.player.number || 'N/A'}</p>
+        <p><strong>Goals:</strong> ${stats.goals ? stats.goals.total : 0}</p>
+        <p><strong>Assists:</strong> ${stats.goals ? stats.goals.assists : 0}</p>
+        <p><strong>Shots on Goal:</strong> ${stats.shots ? stats.shots.on : 0}</p>
+        <p><strong>Yellow Cards:</strong> ${stats.cards ? stats.cards.yellow : 0}</p>
+        <p><strong>Red Cards:</strong> ${stats.cards ? stats.cards.red : 0}</p>
+        <p><strong>Pass Accuracy:</strong> ${stats.passes ? stats.passes.accuracy : 'N/A'}%</p>
+        <p><strong>Minutes Played:</strong> ${stats.games ? stats.games.minutes : 'N/A'}</p>
+      `;
+    }
+
+    // Close player details panel
+    function closePlayerDetails() {
+      document.getElementById("player-details").style.display = "none";
+      document.getElementById("close-player-details").style.display = "none";
+    }
+
+    // Auto-login if user data saved
+    window.onload = () => {
+      const savedUser = JSON.parse(localStorage.getItem('fanzoraUser'));
+      if (savedUser && savedUser.age >= 18) {
+        currentUser = savedUser;
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('user-display').textContent = currentUser.username;
+        loadLiveScores();
+        loadLeaderboard();
+      }
     }
   </script>
 </body>
 </html>
+
 
 
 
