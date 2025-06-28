@@ -38,7 +38,7 @@ function logout() {
   location.reload();
 }
 
-// LOAD LIVE SCORES WITH FANTASY POINTS
+// LOAD LIVE SCORES WITH FANTASY POINTS AND ERROR HANDLING
 async function loadLiveScores() {
   const container = document.getElementById("scores-container");
   container.innerHTML = "<p>Loading live matches and fantasy points...</p>";
@@ -63,26 +63,32 @@ async function loadLiveScores() {
     container.innerHTML = '';
 
     for (const match of data.response) {
-      // Fetch player stats for the fixture
-      const statsRes = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures/players?fixture=${match.fixture.id}`, options);
-      const statsData = await statsRes.json();
-
       let homePoints = 0;
       let awayPoints = 0;
 
-      if (statsData.response) {
-        statsData.response.forEach(player => {
-          player.statistics.forEach(stat => {
-            const goals = stat.goals.total || 0;
-            const assists = stat.goals.assists || 0;
-            const yellow = stat.cards.yellow || 0;
+      try {
+        const statsRes = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures/players?fixture=${match.fixture.id}`, options);
+        const statsData = await statsRes.json();
 
-            const points = (goals * 5) + (assists * 3) - (yellow * 1);
+        if (statsData.response && statsData.response.length > 0) {
+          statsData.response.forEach(player => {
+            player.statistics.forEach(stat => {
+              const goals = stat.goals.total || 0;
+              const assists = stat.goals.assists || 0;
+              const yellow = stat.cards.yellow || 0;
 
-            if (player.team.id === match.teams.home.id) homePoints += points;
-            else if (player.team.id === match.teams.away.id) awayPoints += points;
+              const points = (goals * 5) + (assists * 3) - (yellow * 1);
+
+              if (player.team.id === match.teams.home.id) homePoints += points;
+              else if (player.team.id === match.teams.away.id) awayPoints += points;
+            });
           });
-        });
+        }
+      } catch (e) {
+        console.warn(`No player stats for fixture ${match.fixture.id}`, e);
+        // Default points to 0 if error
+        homePoints = 0;
+        awayPoints = 0;
       }
 
       const card = document.createElement("div");
@@ -99,5 +105,6 @@ async function loadLiveScores() {
     console.error(err);
   }
 }
+
 
 
