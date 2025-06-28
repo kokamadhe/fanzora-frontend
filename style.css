@@ -1,1 +1,23 @@
+body {
+  background-color: #111;
+  color: #fff;
+  font-family: Arial;
+  text-align: center;
+  padding: 20px;
+}
+
+button {
+  padding: 12px 20px;
+  font-size: 16px;
+  background: #00ff7f;
+  border: none;
+  cursor: pointer;
+}
+
+pre {
+  margin-top: 20px;
+  text-align: left;
+  max-width: 600px;
+  margin-inline: auto;
+}
 
