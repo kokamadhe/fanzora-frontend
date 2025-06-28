@@ -121,7 +121,20 @@ async function loadLiveScores() {
       card.className = "score-card";
       card.innerHTML = `
         <strong>${match.teams.home.name}</strong> ${match.goals.home} - ${match.goals.away} <strong>${match.teams.away.name}</strong><br>
-        <small>$
+        <small>${match.league.name} – ${match.fixture.status.short}</small><br>
+        <em>Fantasy Points: ${homePoints.toFixed(1)} - ${awayPoints.toFixed(1)}</em>
+      `;
+      container.appendChild(card);
+    }
+
+    showLeaderboard();
+
+  } catch (err) {
+    container.innerHTML = `<p>Error loading scores. Try again later.</p>`;
+    console.error(err);
+  }
+}
+
 
 
 
