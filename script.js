@@ -38,6 +38,29 @@ function logout() {
   location.reload();
 }
 
+// LEADERBOARD FUNCTIONS
+function updateLeaderboard(username, points) {
+  let leaderboard = JSON.parse(localStorage.getItem("fanzoraLeaderboard")) || {};
+  leaderboard[username] = (leaderboard[username] || 0) + points;
+  localStorage.setItem("fanzoraLeaderboard", JSON.stringify(leaderboard));
+}
+
+function showLeaderboard() {
+  const leaderboardSection = document.getElementById("leaderboard-section");
+  const list = document.getElementById("leaderboard-list");
+  leaderboardSection.style.display = "block";
+
+  let leaderboard = JSON.parse(localStorage.getItem("fanzoraLeaderboard")) || {};
+  let sorted = Object.entries(leaderboard).sort((a,b) => b[1] - a[1]);
+
+  list.innerHTML = "";
+  sorted.forEach(([user, pts]) => {
+    let li = document.createElement("li");
+    li.textContent = `${user}: ${pts.toFixed(1)} pts`;
+    list.appendChild(li);
+  });
+}
+
 // LOAD LIVE SCORES WITH FANTASY POINTS AND ERROR HANDLING
 async function loadLiveScores() {
   const container = document.getElementById("scores-container");
@@ -61,6 +84,7 @@ async function loadLiveScores() {
     }
 
     container.innerHTML = '';
+    const username = localStorage.getItem("fanzoraUser") || "Guest";
 
     for (const match of data.response) {
       let homePoints = 0;
@@ -86,25 +110,19 @@ async function loadLiveScores() {
         }
       } catch (e) {
         console.warn(`No player stats for fixture ${match.fixture.id}`, e);
-        // Default points to 0 if error
         homePoints = 0;
         awayPoints = 0;
       }
+
+      // Update leaderboard with total points from this match
+      updateLeaderboard(username, homePoints + awayPoints);
 
       const card = document.createElement("div");
       card.className = "score-card";
       card.innerHTML = `
         <strong>${match.teams.home.name}</strong> ${match.goals.home} - ${match.goals.away} <strong>${match.teams.away.name}</strong><br>
-        <small>${match.league.name} – ${match.fixture.status.short}</small><br>
-        <em>Fantasy Points: ${homePoints.toFixed(1)} - ${awayPoints.toFixed(1)}</em>
-      `;
-      container.appendChild(card);
-    }
-  } catch (err) {
-    container.innerHTML = `<p>Error loading scores. Try again later.</p>`;
-    console.error(err);
-  }
-}
+        <small>$
+
 
 
 
