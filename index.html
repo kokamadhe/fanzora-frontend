@@ -2,41 +2,189 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fanzora – Live Fantasy</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fanzora Fantasy Sports</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #121212; color: #eee; padding: 20px; }
+    #auth-section, #main-app { max-width: 600px; margin: auto; }
+    #main-app { display: none; }
+    .score-card { background: #222; padding: 10px; margin: 10px 0; border-radius: 6px; }
+    #leaderboard-section { background: #333; padding: 10px; margin-top: 20px; border-radius: 6px; }
+    #leaderboard-list { list-style-type: none; padding-left: 0; }
+    #leaderboard-list li { padding: 5px 0; border-bottom: 1px solid #444; }
+    button { cursor: pointer; padding: 8px 12px; margin-top: 10px; border: none; border-radius: 4px; background: #00FF7F; color: #000; font-weight: bold; }
+    input, label { display: block; margin: 8px 0 4px; }
+    input[type="text"], input[type="date"] { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #222; color: #eee; }
+    #auth-message { color: #f55; }
+  </style>
 </head>
 <body>
-  <div id="auth-section">
-    <h2>Welcome to Fanzora</h2>
+
+  <section id="auth-section">
+    <h1>Welcome to Fanzora</h1>
     <form id="auth-form">
-      <input type="text" id="username" placeholder="Username" required><br>
-      <input type="date" id="birthdate" required><br>
+      <label for="username">Username:</label>
+      <input type="text" id="username" required />
+      <label for="birthdate">Date of Birth:</label>
+      <input type="date" id="birthdate" required />
       <button type="submit">Enter</button>
+      <p id="auth-message"></p>
     </form>
-    <p id="auth-message"></p>
-  </div>
+  </section>
 
-  <div id="main-app" style="display: none;">
-    <header>
-      <h1>⚽ Fanzora</h1>
-      <p>Live Fantasy Sports. Real-Time Action.</p>
-      <button onclick="loadLiveScores()">Load Live Scores</button>
-      <button onclick="logout()">Logout</button>
-    </header>
+  <section id="main-app">
+    <button onclick="logout()">Logout</button>
+    <h1>Live Football Scores & Fantasy Points</h1>
+    <button onclick="loadLiveScores()">Load Live Scores</button>
+    <div id="scores-container"></div>
 
-    <main id="scores-container">
-      <p>Click the button to load live matches</p>
-    </main>
+    <section id="leaderboard-section" style="display:none;">
+      <h2>Leaderboard</h2>
+      <ul id="leaderboard-list"></ul>
+    </section>
+  </section>
 
-    <footer>
-      <p>Built with ❤️ for sports fans</p>
-    </footer>
-  </div>
+  <script>
+    // AUTH SYSTEM
+    window.onload = () => {
+      const user = localStorage.getItem("fanzoraUser");
+      if (user) {
+        showApp();
+      }
 
-  <script src="script.js"></script>
+      document.getElementById("auth-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const birthdate = new Date(document.getElementById("birthdate").value);
+        const today = new Date();
+        let age = today.getFullYear() - birthdate.getFullYear();
+        const monthDiff = today.getMonth() - birthdate.getMonth();
+        const dayDiff = today.getDate() - birthdate.getDate();
+
+        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+          age--;
+        }
+
+        if (age < 18) {
+          document.getElementById("auth-message").innerText = "You must be at least 18 years old to use Fanzora.";
+          return;
+        }
+
+        localStorage.setItem("fanzoraUser", username);
+        showApp();
+      });
+    };
+
+    function showApp() {
+      document.getElementById("auth-section").style.display = "none";
+      document.getElementById("main-app").style.display = "block";
+    }
+
+    function logout() {
+      localStorage.removeItem("fanzoraUser");
+      location.reload();
+    }
+
+    // LEADERBOARD FUNCTIONS
+    function updateLeaderboard(username, points) {
+      let leaderboard = JSON.parse(localStorage.getItem("fanzoraLeaderboard")) || {};
+      leaderboard[username] = (leaderboard[username] || 0) + points;
+      localStorage.setItem("fanzoraLeaderboard", JSON.stringify(leaderboard));
+    }
+
+    function showLeaderboard() {
+      const leaderboardSection = document.getElementById("leaderboard-section");
+      const list = document.getElementById("leaderboard-list");
+      leaderboardSection.style.display = "block";
+
+      let leaderboard = JSON.parse(localStorage.getItem("fanzoraLeaderboard")) || {};
+      let sorted = Object.entries(leaderboard).sort((a,b) => b[1] - a[1]);
+
+      list.innerHTML = "";
+      sorted.forEach(([user, pts]) => {
+        let li = document.createElement("li");
+        li.textContent = `${user}: ${pts.toFixed(1)} pts`;
+        list.appendChild(li);
+      });
+    }
+
+    // LOAD LIVE SCORES WITH FANTASY POINTS AND ERROR HANDLING
+    async function loadLiveScores() {
+      const container = document.getElementById("scores-container");
+      container.innerHTML = "<p>Loading live matches and fantasy points...</p>";
+
+      const options = {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': 'db2d688e15mshc5c4628851de414p19f157jsnbbdea597f1b8',
+          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+        }
+      };
+
+      try {
+        const res = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all', options);
+        const data = await res.json();
+
+        if (!data.response || data.response.length === 0) {
+          container.innerHTML = "<p>No live matches right now.</p>";
+          return;
+        }
+
+        container.innerHTML = '';
+        const username = localStorage.getItem("fanzoraUser") || "Guest";
+
+        for (const match of data.response) {
+          let homePoints = 0;
+          let awayPoints = 0;
+
+          try {
+            const statsRes = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures/players?fixture=${match.fixture.id}`, options);
+            const statsData = await statsRes.json();
+
+            if (statsData.response && statsData.response.length > 0) {
+              statsData.response.forEach(player => {
+                player.statistics.forEach(stat => {
+                  const goals = stat.goals.total || 0;
+                  const assists = stat.goals.assists || 0;
+                  const yellow = stat.cards.yellow || 0;
+
+                  const points = (goals * 5) + (assists * 3) - (yellow * 1);
+
+                  if (player.team.id === match.teams.home.id) homePoints += points;
+                  else if (player.team.id === match.teams.away.id) awayPoints += points;
+                });
+              });
+            }
+          } catch (e) {
+            console.warn(`No player stats for fixture ${match.fixture.id}`, e);
+            homePoints = 0;
+            awayPoints = 0;
+          }
+
+          // Update leaderboard with total points from this match
+          updateLeaderboard(username, homePoints + awayPoints);
+
+          const card = document.createElement("div");
+          card.className = "score-card";
+          card.innerHTML = `
+            <strong>${match.teams.home.name}</strong> ${match.goals.home} - ${match.goals.away} <strong>${match.teams.away.name}</strong><br>
+            <small>${match.league.name} – ${match.fixture.status.short}</small><br>
+            <em>Fantasy Points: ${homePoints.toFixed(1)} - ${awayPoints.toFixed(1)}</em>
+          `;
+          container.appendChild(card);
+        }
+
+        showLeaderboard();
+
+      } catch (err) {
+        container.innerHTML = `<p>Error loading scores. Try again later.</p>`;
+        console.error(err);
+      }
+    }
+  </script>
 </body>
 </html>
+
 
 
 
