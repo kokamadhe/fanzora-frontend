@@ -1,166 +1,191 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
-
-const colors = {
-  primary: '#1A1A1A',
-  secondary: '#00FF7F',
-  accent: '#007BFF',
-  background: '#000000',
-  text: '#FFFFFF',
-  greyText: '#A0A0A0',
-};
-
-const NavLink = ({ children, to }) => (
-  <Link to={to} className="text-text hover:text-secondary px-4 py-2 rounded-lg transition-colors duration-300 font-medium text-base" style={{ color: colors.text }}>{children}</Link>
-);
-
-const FeatureCard = ({ title, description, icon }) => (
-  <div className="bg-primary-dark rounded-xl p-6 flex flex-col items-center text-center shadow-lg transition-transform duration-300 hover:scale-105" style={{ backgroundColor: colors.primary }}>
-    <div className="w-16 h-16 flex items-center justify-center rounded-full mb-4" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` }}>
-      <span className="text-3xl" role="img" aria-label={title}>{icon}</span>
-    </div>
-    <h3 className="text-xl font-bold mb-2" style={{ color: colors.text }}>{title}</h3>
-    <p className="text-greyText text-sm" style={{ color: colors.greyText }}>{description}</p>
-  </div>
-);
-
-const ScoreCard = ({ match }) => (
-  <div className="bg-gray-800 text-white p-4 rounded-lg mb-4">
-    <h4 className="text-lg font-bold">{match.teams?.home?.name} vs {match.teams?.away?.name || match.teams?.visitors?.name}</h4>
-    <p>Score: {match.scores?.home?.points || match.goals?.home} - {match.scores?.away?.points || match.goals?.away}</p>
-    <p>Status: {match.status?.long}</p>
-  </div>
-);
-
-const LoginPage = ({ setUser }) => {
-  const navigate = useNavigate();
-  const handleLogin = () => {
-    const age = prompt('Enter your age:');
-    if (parseInt(age) < 18) {
-      alert('You must be 18 or older to use Fanzora.');
-      return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fanzora - Fantasy Sports Arena</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #000;
+      color: #fff;
     }
-    setUser({ name: 'FanUser' });
-    navigate('/');
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
-      <div className="bg-gray-900 p-8 rounded-xl shadow-lg text-white w-80">
-        <h2 className="text-2xl font-bold mb-4">Login / Sign Up</h2>
-        <button onClick={handleLogin} className="bg-blue-500 w-full py-2 rounded font-bold hover:bg-blue-600 transition">Continue</button>
-      </div>
-    </div>
-  );
-};
-
-const FanzoraHome = ({ user, setUser }) => {
-  const [sport, setSport] = useState('football');
-  const [scores, setScores] = useState([]);
-
-  const loadLiveScores = async () => {
-    const apiKey = 'YOUR_API_KEY';
-    let url = '';
-    let headers = {};
-
-    if (sport === 'football') {
-      url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all';
-      headers = {
-        'X-RapidAPI-Key': apiKey,
-        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com',
-      };
-    } else if (sport === 'basketball') {
-      url = 'https://api-basketball.p.rapidapi.com/games?league=12&season=2024&live=all';
-      headers = {
-        'X-RapidAPI-Key': apiKey,
-        'X-RapidAPI-Host': 'api-basketball.p.rapidapi.com',
-      };
+    header {
+      background: #1A1A1A;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav a {
+      color: white;
+      margin: 0 1rem;
+      text-decoration: none;
+    }
+    .hero {
+      background: linear-gradient(rgba(0,0,0,.8), rgba(0,0,0,.8)), url('https://placehold.co/1920x1080') center/cover no-repeat;
+      text-align: center;
+      padding: 6rem 1rem;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      animation: fadeInUp 1s ease forwards;
+    }
+    .hero p {
+      color: #A0A0A0;
+      font-size: 1.2rem;
+      animation: fadeInUp 1.2s ease forwards;
+    }
+    .btn {
+      margin-top: 1.5rem;
+      padding: 1rem 2rem;
+      background: #00FF7F;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      animation: pulse 2s infinite;
+    }
+    .section {
+      padding: 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .score {
+      background: #1A1A1A;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 10px;
+    }
+    select {
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: #1A1A1A;
+      color: #A0A0A0;
     }
 
-    try {
-      const res = await fetch(url, { headers });
-      const data = res.ok ? await res.json() : null;
-      setScores(data?.response || []);
-    } catch (err) {
-      console.error(err);
-      setScores([]);
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-  };
 
-  useEffect(() => {
-    loadLiveScores();
-  }, [sport]);
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 20px #00FF7F;
+      }
+      50% {
+        box-shadow: 0 0 40px #00FF7F;
+      }
+    }
+  </style>
+</head>
+<body>
 
-  return (
-    <div className="min-h-screen font-sans" style={{ backgroundColor: colors.background }}>
-      <header className="py-5 shadow-lg" style={{ backgroundColor: colors.primary }}>
-        <nav className="container mx-auto flex justify-between items-center px-4">
-          <div className="text-3xl font-extrabold" style={{ color: colors.accent }}>Fanzora</div>
-          <div className="hidden md:flex space-x-6">
-            <NavLink to="/">Home</NavLink>
-            <NavLink to="#leagues">Leagues</NavLink>
-            <NavLink to="#contests">Contests</NavLink>
-            <NavLink to="#myteam">My Team</NavLink>
+  <header>
+    <div style="color:#007BFF; font-size: 1.8rem; font-weight: bold;">Fanzora</div>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Leagues</a>
+      <a href="#">Contests</a>
+      <a href="#">My Team</a>
+    </nav>
+    <button class="btn" onclick="login()">Sign Up / Login</button>
+  </header>
+
+  <section class="hero">
+    <h1>Unleash Your Inner Football Guru</h1>
+    <p>Fanzora: The ultimate fantasy arena to challenge your sports knowledge in real time.</p>
+    <button class="btn" onclick="loadScores()">Join the Arena</button>
+  </section>
+
+  <section class="section">
+    <h2>Choose Sport</h2>
+    <select id="sportSelect" onchange="loadScores()">
+      <option value="football">Football</option>
+      <option value="basketball">Basketball</option>
+    </select>
+
+    <div id="scores"></div>
+  </section>
+
+  <footer>
+    &copy; 2024 Fanzora. All rights reserved.
+  </footer>
+
+  <script>
+    function login() {
+      const age = prompt("Enter your age:");
+      if (parseInt(age) < 18) {
+        alert("You must be 18 or older to use Fanzora.");
+      } else {
+        alert("Welcome to Fanzora!");
+      }
+    }
+
+    async function loadScores() {
+      const sport = document.getElementById('sportSelect').value;
+      const scoresContainer = document.getElementById('scores');
+      scoresContainer.innerHTML = 'Loading...';
+
+      let url = '';
+      let host = '';
+
+      if (sport === 'football') {
+        url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all';
+        host = 'api-football-v1.p.rapidapi.com';
+      } else if (sport === 'basketball') {
+        url = 'https://api-basketball.p.rapidapi.com/games?league=12&season=2024&live=all';
+        host = 'api-basketball.p.rapidapi.com';
+      }
+
+      try {
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': 'db2d688e15mshc5c4628851de414p19f157jsnbbdea597f1b8',
+            'X-RapidAPI-Host': host
+          }
+        });
+
+        const data = await res.json();
+        const matches = data.response || [];
+
+        if (!matches.length) {
+          scoresContainer.innerHTML = '<p>No live games right now.</p>';
+          return;
+        }
+
+        scoresContainer.innerHTML = matches.map(match => `
+          <div class="score">
+            <strong>${match.teams?.home?.name || match.teams?.localTeam?.name} vs ${match.teams?.away?.name || match.teams?.visitorTeam?.name}</strong><br>
+            Score: ${match.goals?.home ?? match.scores?.home?.points} - ${match.goals?.away ?? match.scores?.away?.points}<br>
+            Status: ${match.status?.long || match.status?.description}
           </div>
-          <NavLink to="/login">
-            <button className="px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 transform active:scale-95" style={{ backgroundColor: colors.accent, color: colors.text, boxShadow: `0 0 15px ${colors.accent}` }}>
-              {user ? 'Welcome, ' + user.name : 'Sign Up / Login'}
-            </button>
-          </NavLink>
-        </nav>
-      </header>
+        `).join('');
+      } catch (e) {
+        scoresContainer.innerHTML = '<p>Error loading scores.</p>';
+        console.error(e);
+      }
+    }
 
-      <section className="py-12 container mx-auto px-4 text-center">
-        <h2 className="text-4xl font-bold mb-6" style={{ color: colors.text }}>Choose Sport</h2>
-        <select value={sport} onChange={(e) => setSport(e.target.value)} className="p-3 rounded-lg text-black">
-          <option value="football">Football</option>
-          <option value="basketball">Basketball</option>
-        </select>
-      </section>
+    // Load on page load
+    loadScores();
+  </script>
+</body>
+</html>
 
-      <section className="py-12 container mx-auto px-4">
-        <h2 className="text-4xl font-bold mb-6" style={{ color: colors.text }}>Live Scores</h2>
-        {scores.length === 0 ? <p style={{ color: colors.greyText }}>No live games right now.</p> : scores.map((match, index) => <ScoreCard key={index} match={match} />)}
-      </section>
-
-      <section className="relative flex items-center justify-center text-center py-24 md:py-36 overflow-hidden" style={{ background: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://placehold.co/1920x1080') center center / cover no-repeat` }}>
-        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}></div>
-        <div className="relative z-10 max-w-4xl px-4">
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-up" style={{ color: colors.text }}>
-            Unleash Your Inner Football Guru
-          </h1>
-          <p className="text-xl md:text-2xl mb-10 leading-relaxed animate-fade-in-up delay-200" style={{ color: colors.greyText }}>
-            Fanzora: The ultimate destination for fans who want to test their knowledge and passion on a competitive fantasy stage.
-          </p>
-          <button className="px-10 py-4 rounded-full font-bold text-xl transition-all duration-300 hover:scale-105 transform active:scale-95 animate-pulse" style={{ backgroundColor: colors.secondary, color: colors.primary, boxShadow: `0 0 20px ${colors.secondary}` }}>
-            Join the Arena
-          </button>
-        </div>
-      </section>
-
-      <footer className="py-8 text-center" style={{ backgroundColor: colors.primary }}>
-        <p className="text-greyText text-sm" style={{ color: colors.greyText }}>
-          &copy; 2024 Fanzora. All rights reserved.
-        </p>
-      </footer>
-    </div>
-  );
-};
-
-const FanzoraLandingPage = () => {
-  const [user, setUser] = useState(null);
-
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<FanzoraHome user={user} setUser={setUser} />} />
-        <Route path="/login" element={<LoginPage setUser={setUser} />} />
-      </Routes>
-    </Router>
-  );
-};
-
-export default FanzoraLandingPage;
 
 
 
