@@ -1,241 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fanzora</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #000;
-      color: #fff;
+import React, { useState, useEffect } from 'react';
+
+const FanzoraLandingPage = () => {
+  const colors = {
+    primary: '#1A1A1A',
+    secondary: '#00FF7F',
+    accent: '#007BFF',
+    background: '#000000',
+    text: '#FFFFFF',
+    greyText: '#A0A0A0',
+  };
+
+  const [user, setUser] = useState(null);
+  const [sport, setSport] = useState('football');
+  const [scores, setScores] = useState([]);
+
+  const handleLogin = () => {
+    const age = prompt('Enter your age:');
+    if (parseInt(age) < 18) {
+      alert('You must be 18 or older to use Fanzora.');
+      return;
     }
-    header {
-      background: #1A1A1A;
-      padding: 1em 2em;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    }
-    nav a {
-      margin: 0 1em;
-      color: #fff;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    nav a:hover {
-      color: #00FF7F;
-    }
-    .button {
-      background: #007BFF;
-      color: white;
-      padding: 0.7em 1.5em;
-      border: none;
-      border-radius: 30px;
-      font-weight: bold;
-      box-shadow: 0 0 15px #007BFF;
-      cursor: pointer;
-      transition: transform 0.3s;
-    }
-    .button:hover {
-      transform: scale(1.05);
-    }
-    .hero {
-      text-align: center;
-      padding: 100px 20px;
-      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://placehold.co/1920x1080?text=1920x1080+Hero+Image') center/cover;
-    }
-    .hero h1 {
-      font-size: 3em;
-      animation: fadeInUp 0.8s ease-out both;
-    }
-    .hero p {
-      font-size: 1.2em;
-      color: #A0A0A0;
-      animation: fadeInUp 0.8s ease-out both;
-      animation-delay: 0.2s;
-    }
-    .hero .button {
-      margin-top: 20px;
-      background: #00FF7F;
-      color: #000;
-      box-shadow: 0 0 20px #00FF7F;
-      animation: pulse 2s infinite;
-    }
-    .features, .scores {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2em;
-      padding: 60px 20px;
-    }
-    .feature, .score-card {
-      background: #1A1A1A;
-      padding: 2em;
-      border-radius: 20px;
-      text-align: center;
-      animation: fadeInUp 0.8s ease-out both;
-    }
-    .feature-icon {
-      font-size: 2.5em;
-      background: linear-gradient(135deg, #007BFF, #00FF7F);
-      border-radius: 50%;
-      width: 64px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1em;
-    }
-    footer {
-      background: #1A1A1A;
-      padding: 2em;
-      text-align: center;
-      color: #A0A0A0;
-    }
-    select {
-      padding: 0.5em;
-      border-radius: 8px;
-      margin: 1em;
+    setUser({ name: 'FanUser' });
+  };
+
+  const loadLiveScores = async () => {
+    const apiKey = 'YOUR_API_KEY';
+    let url = '';
+    let headers = {};
+
+    if (sport === 'football') {
+      url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all';
+      headers = {
+        'X-RapidAPI-Key': apiKey,
+        'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com',
+      };
+    } else if (sport === 'basketball') {
+      url = 'https://api-basketball.p.rapidapi.com/games?league=12&season=2024&live=all';
+      headers = {
+        'X-RapidAPI-Key': apiKey,
+        'X-RapidAPI-Host': 'api-basketball.p.rapidapi.com',
+      };
     }
 
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(30px); }
-      100% { opacity: 1; transform: translateY(0); }
+    try {
+      const res = await fetch(url, { headers });
+      const data = res.ok ? await res.json() : null;
+      setScores(data?.response || []);
+    } catch (err) {
+      console.error(err);
+      setScores([]);
     }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 20px #00FF7F; }
-      50% { box-shadow: 0 0 40px #00FF7F; }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div style="font-size: 1.8em; font-weight: bold; color: #007BFF;">Fanzora</div>
-    <nav>
-      <a href="#home">Home</a>
-      <a href="#leagues">Leagues</a>
-      <a href="#contests">Contests</a>
-      <a href="#myteam">My Team</a>
-    </nav>
-    <button class="button" onclick="handleLogin()">Sign Up / Login</button>
-  </header>
+  };
 
-  <section class="hero">
-    <h1>Unleash Your Inner Football Guru</h1>
-    <p>Fanzora: The ultimate fantasy arena for real fans. Are you ready?</p>
-    <button class="button">Join the Arena</button>
-  </section>
+  useEffect(() => {
+    loadLiveScores();
+  }, [sport]);
 
-  <section class="features">
-    <div class="feature">
-      <div class="feature-icon">👤</div>
-      <h3>Custom User Accounts</h3>
-      <p>Track your progress and manage your fantasy profile easily.</p>
+  const NavLink = ({ children, to }) => (
+    <a href={to} className="text-text hover:text-secondary px-4 py-2 rounded-lg transition-colors duration-300 font-medium text-base" style={{ color: colors.text }}>{children}</a>
+  );
+
+  const FeatureCard = ({ title, description, icon }) => (
+    <div className="bg-primary-dark rounded-xl p-6 flex flex-col items-center text-center shadow-lg transition-transform duration-300 hover:scale-105" style={{ backgroundColor: colors.primary }}>
+      <div className="w-16 h-16 flex items-center justify-center rounded-full mb-4" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` }}>
+        <span className="text-3xl" role="img" aria-label={title}>{icon}</span>
+      </div>
+      <h3 className="text-xl font-bold mb-2" style={{ color: colors.text }}>{title}</h3>
+      <p className="text-greyText text-sm" style={{ color: colors.greyText }}>{description}</p>
     </div>
-    <div class="feature">
-      <div class="feature-icon">🏆</div>
-      <h3>Live Contests</h3>
-      <p>Compete in real-time based on actual sports data.</p>
+  );
+
+  const ScoreCard = ({ match }) => (
+    <div className="bg-gray-800 text-white p-4 rounded-lg mb-4">
+      <h4 className="text-lg font-bold">{match.teams?.home?.name} vs {match.teams?.away?.name || match.teams?.visitors?.name}</h4>
+      <p>Score: {match.scores?.home?.points || match.goals?.home} - {match.scores?.away?.points || match.goals?.away}</p>
+      <p>Status: {match.status?.long}</p>
     </div>
-    <div class="feature">
-      <div class="feature-icon">📊</div>
-      <h3>Real-Time Scoring</h3>
-      <p>Stats update as the game unfolds.</p>
+  );
+
+  return (
+    <div className="min-h-screen font-sans" style={{ backgroundColor: colors.background }}>
+      <header className="py-5 shadow-lg" style={{ backgroundColor: colors.primary }}>
+        <nav className="container mx-auto flex justify-between items-center px-4">
+          <div className="text-3xl font-extrabold" style={{ color: colors.accent }}>Fanzora</div>
+          <div className="hidden md:flex space-x-6">
+            <NavLink to="#home">Home</NavLink>
+            <NavLink to="#leagues">Leagues</NavLink>
+            <NavLink to="#contests">Contests</NavLink>
+            <NavLink to="#myteam">My Team</NavLink>
+          </div>
+          <button onClick={handleLogin} className="px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 transform active:scale-95" style={{ backgroundColor: colors.accent, color: colors.text, boxShadow: `0 0 15px ${colors.accent}` }}>
+            {user ? 'Welcome, ' + user.name : 'Sign Up / Login'}
+          </button>
+        </nav>
+      </header>
+
+      {/* Move Live Scores First */}
+      <section className="py-12 container mx-auto px-4 text-center">
+        <h2 className="text-4xl font-bold mb-6" style={{ color: colors.text }}>Choose Sport</h2>
+        <select value={sport} onChange={(e) => setSport(e.target.value)} className="p-3 rounded-lg text-black">
+          <option value="football">Football</option>
+          <option value="basketball">Basketball</option>
+        </select>
+      </section>
+
+      <section className="py-12 container mx-auto px-4">
+        <h2 className="text-4xl font-bold mb-6" style={{ color: colors.text }}>Live Scores</h2>
+        {scores.length === 0 ? <p style={{ color: colors.greyText }}>No live games right now.</p> : scores.map((match, index) => <ScoreCard key={index} match={match} />)}
+      </section>
+
+      {/* Hero Section After Live Scores */}
+      <section className="relative flex items-center justify-center text-center py-24 md:py-36 overflow-hidden" style={{ background: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://placehold.co/1920x1080') center center / cover no-repeat` }}>
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}></div>
+        <div className="relative z-10 max-w-4xl px-4">
+          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-up" style={{ color: colors.text }}>
+            Unleash Your Inner Football Guru
+          </h1>
+          <p className="text-xl md:text-2xl mb-10 leading-relaxed animate-fade-in-up delay-200" style={{ color: colors.greyText }}>
+            Fanzora: The ultimate destination for fans who want to test their knowledge and passion on a competitive fantasy stage.
+          </p>
+          <button className="px-10 py-4 rounded-full font-bold text-xl transition-all duration-300 hover:scale-105 transform active:scale-95 animate-pulse" style={{ backgroundColor: colors.secondary, color: colors.primary, boxShadow: `0 0 20px ${colors.secondary}` }}>
+            Join the Arena
+          </button>
+        </div>
+      </section>
+
+      <section className="py-12 container mx-auto px-4">
+        <h2 className="text-4xl font-bold text-center mb-10" style={{ color: colors.text }}>Create or Join Contests</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-6 rounded-xl bg-gray-900 text-white">
+            <h3 className="text-2xl font-bold mb-4">Create Contest</h3>
+            <input className="w-full p-2 rounded mb-2 text-black" placeholder="Contest Name" />
+            <input className="w-full p-2 rounded mb-2 text-black" placeholder="Entry Fee ($)" />
+            <button className="bg-green-500 px-4 py-2 rounded text-black font-bold w-full">Create</button>
+          </div>
+          <div className="p-6 rounded-xl bg-gray-900 text-white">
+            <h3 className="text-2xl font-bold mb-4">Join Contest</h3>
+            <input className="w-full p-2 rounded mb-2 text-black" placeholder="Contest Code" />
+            <button className="bg-blue-500 px-4 py-2 rounded text-white font-bold w-full">Join</button>
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-8 text-center" style={{ backgroundColor: colors.primary }}>
+        <p className="text-greyText text-sm" style={{ color: colors.greyText }}>
+          &copy; 2024 Fanzora. All rights reserved.
+        </p>
+      </footer>
     </div>
-    <div class="feature">
-      <div class="feature-icon">📋</div>
-      <h3>Team Management</h3>
-      <p>Build and tweak your dream team anytime.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">🔒</div>
-      <h3>Secure Payments</h3>
-      <p>Play and win with confidence via Stripe integration.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">⚡</div>
-      <h3>Thrilling Gameplay</h3>
-      <p>Fantasy football with a competitive edge.</p>
-    </div>
-  </section>
+  );
+};
 
-  <section style="text-align:center; padding: 40px;">
-    <h2>Live Scores</h2>
-    <select id="sport-select">
-      <option value="football">Football</option>
-      <option value="basketball">Basketball</option>
-    </select>
-    <div id="scores" class="scores"></div>
-  </section>
+export default FanzoraLandingPage;
 
-  <footer>
-    &copy; 2024 Fanzora. All rights reserved.
-  </footer>
-
-  <script>
-    function handleLogin() {
-      const age = prompt("Enter your age:");
-      if (parseInt(age) < 18) {
-        alert("You must be 18 or older to use Fanzora.");
-      } else {
-        alert("Welcome to Fanzora!");
-      }
-    }
-
-    const scoresDiv = document.getElementById('scores');
-    const select = document.getElementById('sport-select');
-    const apiKey = 'YOUR_API_KEY'; // Replace with your real key
-
-    async function loadScores() {
-      const sport = select.value;
-      let url = '';
-      let headers = {};
-
-      if (sport === 'football') {
-        url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all';
-        headers = {
-          'X-RapidAPI-Key': apiKey,
-          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
-        };
-      } else if (sport === 'basketball') {
-        url = 'https://api-basketball.p.rapidapi.com/games?live=all';
-        headers = {
-          'X-RapidAPI-Key': apiKey,
-          'X-RapidAPI-Host': 'api-basketball.p.rapidapi.com'
-        };
-      }
-
-      try {
-        const res = await fetch(url, { headers });
-        const data = await res.json();
-        scoresDiv.innerHTML = '';
-        if (data.response && data.response.length > 0) {
-          data.response.forEach(match => {
-            const card = document.createElement('div');
-            card.className = 'score-card';
-            card.innerHTML = `
-              <h3>${match.teams?.home?.name || match.teams?.visitors?.name} vs ${match.teams?.away?.name || match.teams?.home?.name}</h3>
-              <p>Score: ${match.goals?.home ?? match.scores?.home?.points} - ${match.goals?.away ?? match.scores?.away?.points}</p>
-              <p>Status: ${match.status?.long || match.status?.description}</p>
-            `;
-            scoresDiv.appendChild(card);
-          });
-        } else {
-          scoresDiv.innerHTML = '<p>No live games at the moment.</p>';
-        }
-      } catch (e) {
-        scoresDiv.innerHTML = '<p>Error loading scores.</p>';
-        console.error(e);
-      }
-    }
-
-    select.addEventListener('change', loadScores);
-    window.addEventListener('load', loadScores);
-  </script>
-</body>
-</html>
 
 
 
