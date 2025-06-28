@@ -1,4 +1,7 @@
 async function loadLiveScores() {
+  const container = document.getElementById("scores-container");
+  container.innerHTML = "<p>Loading live matches...</p>";
+
   const options = {
     method: 'GET',
     headers: {
@@ -7,13 +10,28 @@ async function loadLiveScores() {
     }
   };
 
-  const res = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all', options);
-  const data = await res.json();
+  try {
+    const res = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all', options);
+    const data = await res.json();
 
-  let text = '';
-  data.response.forEach(match => {
-    text += `${match.teams.home.name} ${match.goals.home} - ${match.goals.away} ${match.teams.away.name} (${match.league.name})\n`;
-  });
+    if (!data.response || data.response.length === 0) {
+      container.innerHTML = "<p>No live matches right now.</p>";
+      return;
+    }
 
-  document.getElementById('output').textContent = text || 'No live matches right now.';
+    container.innerHTML = '';
+    data.response.forEach(match => {
+      const card = document.createElement("div");
+      card.className = "score-card";
+      card.innerHTML = `
+        <strong>${match.teams.home.name}</strong> ${match.goals.home} - ${match.goals.away} <strong>${match.teams.away.name}</strong><br>
+        <small>${match.league.name} – ${match.fixture.status.short}</small>
+      `;
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    container.innerHTML = `<p>Error loading scores. Try again later.</p>`;
+    console.error(err);
+  }
 }
