@@ -3,14 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fanzora Fantasy Sports</title>
+  <title>Fanzora – Live Fantasy</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Fanzora – Live Fantasy Contests</h1>
-  <button onclick="loadLiveScores()">Load Live Football Scores</button>
-  <pre id="output">Loading...</pre>
+  <header>
+    <h1>⚽ Fanzora</h1>
+    <p>Live Fantasy Sports. Real-Time Action.</p>
+    <button onclick="loadLiveScores()">Load Live Scores</button>
+  </header>
+
+  <main id="scores-container" class="fade-in">
+    <p>Click the button to load live matches</p>
+  </main>
+
+  <footer>
+    <p>Built with ❤️ for sports fans</p>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
+
 
