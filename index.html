@@ -126,6 +126,52 @@
       min-height: 20px;
     }
 
+    /* Contest Section CSS */
+    #contest-section {
+      background: #1f1f1f;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 30px;
+      box-shadow: 0 0 15px #00ff7faa;
+    }
+
+    #contest-list {
+      list-style-type: none;
+      padding-left: 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #contest-list li {
+      padding: 10px;
+      border-bottom: 1px solid #444;
+      cursor: pointer;
+      color: #00ff7f;
+      transition: background 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #contest-list li:hover {
+      background: #007f3f44;
+    }
+
+    .join-btn {
+      background: #007bff;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .join-btn:hover {
+      background: #0056b3;
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 10px;
@@ -156,7 +202,7 @@
     </form>
   </section>
 
-  <section id="main-app">
+  <section id="main-app" style="display:none;">
     <button onclick="logout()">Logout</button>
     <h1>Live Football Scores & Fantasy Points</h1>
 
@@ -174,6 +220,24 @@
     <section id="leaderboard-section" style="display:none;">
       <h2>Leaderboard</h2>
       <ul id="leaderboard-list"></ul>
+    </section>
+
+    <!-- Contest Section -->
+    <section id="contest-section">
+      <h2>Contests</h2>
+
+      <div id="create-contest">
+        <h3>Create a Contest</h3>
+        <input type="text" id="contest-name" placeholder="Contest Name" />
+        <input type="number" id="contest-fee" placeholder="Entry Fee (USD)" min="0" />
+        <button onclick="createContest()">Create Contest</button>
+        <p id="contest-message"></p>
+      </div>
+
+      <div id="available-contests">
+        <h3>Available Contests</h3>
+        <ul id="contest-list"></ul>
+      </div>
     </section>
   </section>
 
@@ -217,6 +281,8 @@
     function showApp() {
       document.getElementById("auth-section").style.display = "none";
       document.getElementById("main-app").style.display = "block";
+      loadLiveScores("all");
+      renderContests();
     }
 
     function logout() {
@@ -328,10 +394,110 @@
         console.error(err);
       }
     }
-  </script>
 
+    // Contest Functions
+
+    // Create a contest
+    function createContest() {
+      const name = document.getElementById("contest-name").value.trim();
+      const fee = parseFloat(document.getElementById("contest-fee").value);
+      const message = document.getElementById("contest-message");
+      message.style.color = "#ff5555";
+
+      if (!name) {
+        message.innerText = "Please enter a contest name.";
+        return;
+      }
+      if (isNaN(fee) || fee < 0) {
+        message.innerText = "Please enter a valid entry fee.";
+        return;
+      }
+
+      let contests = JSON.parse(localStorage.getItem("fanzoraContests")) || [];
+
+      // Check for duplicate names
+      if (contests.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+        message.innerText = "A contest with this name already exists.";
+        return;
+      }
+
+      const newContest = {
+        id: Date.now().toString(),
+        name,
+        fee,
+        participants: []
+      };
+
+      contests.push(newContest);
+      localStorage.setItem("fanzoraContests", JSON.stringify(contests));
+
+      message.style.color = "#00ff7f";
+      message.innerText = `Contest "${name}" created!`;
+      document.getElementById("contest-name").value = "";
+      document.getElementById("contest-fee").value = "";
+
+      renderContests();
+    }
+
+    // Render contests list
+    function renderContests() {
+      const list = document.getElementById("contest-list");
+      list.innerHTML = "";
+
+      const contests = JSON.parse(localStorage.getItem("fanzoraContests")) || [];
+      const username = localStorage.getItem("fanzoraUser") || "Guest";
+
+      if (contests.length === 0) {
+        list.innerHTML = "<li>No contests available.</li>";
+        return;
+      }
+
+      contests.forEach(contest => {
+        const li = document.createElement("li");
+        li.textContent = `${contest.name} - Entry Fee: $${contest.fee.toFixed(2)} - Participants: ${contest.participants.length}`;
+
+        // Add join button if user not joined yet
+        if (!contest.participants.includes(username)) {
+          const joinBtn = document.createElement("button");
+          joinBtn.className = "join-btn";
+          joinBtn.textContent = "Join";
+          joinBtn.onclick = () => joinContest(contest.id);
+          li.appendChild(joinBtn);
+        } else {
+          const joinedTag = document.createElement("span");
+          joinedTag.style.color = "#00ff7f";
+          joinedTag.style.fontWeight = "700";
+          joinedTag.style.marginLeft = "10px";
+          joinedTag.textContent = "Joined";
+          li.appendChild(joinedTag);
+        }
+
+        list.appendChild(li);
+      });
+    }
+
+    // Join contest function
+    function joinContest(contestId) {
+      const username = localStorage.getItem("fanzoraUser") || "Guest";
+      let contests = JSON.parse(localStorage.getItem("fanzoraContests")) || [];
+
+      const contestIndex = contests.findIndex(c => c.id === contestId);
+      if (contestIndex === -1) return alert("Contest not found.");
+
+      if (contests[contestIndex].participants.includes(username)) {
+        return alert("You already joined this contest.");
+      }
+
+      contests[contestIndex].participants.push(username);
+      localStorage.setItem("fanzoraContests", JSON.stringify(contests));
+
+      alert(`You joined "${contests[contestIndex].name}"!`);
+      renderContests();
+    }
+  </script>
 </body>
 </html>
+
 
 
 
