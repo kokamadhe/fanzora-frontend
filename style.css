@@ -1,23 +1,88 @@
+/* Global Styles */
 body {
-  background-color: #111;
+  margin: 0;
+  background: #0d0d0d;
   color: #fff;
-  font-family: Arial;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header */
+header {
+  background: linear-gradient(to right, #00ff7f, #007bff);
+  width: 100%;
+  padding: 30px 20px;
   text-align: center;
-  padding: 20px;
+  color: #000;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+header p {
+  font-size: 1.2rem;
+  margin-top: 5px;
 }
 
 button {
-  padding: 12px 20px;
-  font-size: 16px;
-  background: #00ff7f;
+  background: #fff;
+  color: #000;
   border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  margin-top: 15px;
   cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.3s ease;
 }
 
-pre {
-  margin-top: 20px;
-  text-align: left;
-  max-width: 600px;
-  margin-inline: auto;
+button:hover {
+  background: #ddd;
 }
+
+/* Scores */
+main {
+  width: 90%;
+  max-width: 700px;
+  padding: 20px;
+}
+
+.score-card {
+  background: #1a1a1a;
+  margin: 15px 0;
+  padding: 15px;
+  border-radius: 12px;
+  border-left: 5px solid #00ff7f;
+  animation: slideIn 0.5s ease forwards;
+}
+
+.score-card:hover {
+  background: #222;
+}
+
+/* Footer */
+footer {
+  margin-top: auto;
+  padding: 20px;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
