@@ -1,19 +1,39 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 
-const FanzoraLandingPage = () => {
-  const colors = {
-    primary: '#1A1A1A',
-    secondary: '#00FF7F',
-    accent: '#007BFF',
-    background: '#000000',
-    text: '#FFFFFF',
-    greyText: '#A0A0A0',
-  };
+const colors = {
+  primary: '#1A1A1A',
+  secondary: '#00FF7F',
+  accent: '#007BFF',
+  background: '#000000',
+  text: '#FFFFFF',
+  greyText: '#A0A0A0',
+};
 
-  const [user, setUser] = useState(null);
-  const [sport, setSport] = useState('football');
-  const [scores, setScores] = useState([]);
+const NavLink = ({ children, to }) => (
+  <Link to={to} className="text-text hover:text-secondary px-4 py-2 rounded-lg transition-colors duration-300 font-medium text-base" style={{ color: colors.text }}>{children}</Link>
+);
 
+const FeatureCard = ({ title, description, icon }) => (
+  <div className="bg-primary-dark rounded-xl p-6 flex flex-col items-center text-center shadow-lg transition-transform duration-300 hover:scale-105" style={{ backgroundColor: colors.primary }}>
+    <div className="w-16 h-16 flex items-center justify-center rounded-full mb-4" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` }}>
+      <span className="text-3xl" role="img" aria-label={title}>{icon}</span>
+    </div>
+    <h3 className="text-xl font-bold mb-2" style={{ color: colors.text }}>{title}</h3>
+    <p className="text-greyText text-sm" style={{ color: colors.greyText }}>{description}</p>
+  </div>
+);
+
+const ScoreCard = ({ match }) => (
+  <div className="bg-gray-800 text-white p-4 rounded-lg mb-4">
+    <h4 className="text-lg font-bold">{match.teams?.home?.name} vs {match.teams?.away?.name || match.teams?.visitors?.name}</h4>
+    <p>Score: {match.scores?.home?.points || match.goals?.home} - {match.scores?.away?.points || match.goals?.away}</p>
+    <p>Status: {match.status?.long}</p>
+  </div>
+);
+
+const LoginPage = ({ setUser }) => {
+  const navigate = useNavigate();
   const handleLogin = () => {
     const age = prompt('Enter your age:');
     if (parseInt(age) < 18) {
@@ -21,7 +41,22 @@ const FanzoraLandingPage = () => {
       return;
     }
     setUser({ name: 'FanUser' });
+    navigate('/');
   };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.background }}>
+      <div className="bg-gray-900 p-8 rounded-xl shadow-lg text-white w-80">
+        <h2 className="text-2xl font-bold mb-4">Login / Sign Up</h2>
+        <button onClick={handleLogin} className="bg-blue-500 w-full py-2 rounded font-bold hover:bg-blue-600 transition">Continue</button>
+      </div>
+    </div>
+  );
+};
+
+const FanzoraHome = ({ user, setUser }) => {
+  const [sport, setSport] = useState('football');
+  const [scores, setScores] = useState([]);
 
   const loadLiveScores = async () => {
     const apiKey = 'YOUR_API_KEY';
@@ -56,46 +91,25 @@ const FanzoraLandingPage = () => {
     loadLiveScores();
   }, [sport]);
 
-  const NavLink = ({ children, to }) => (
-    <a href={to} className="text-text hover:text-secondary px-4 py-2 rounded-lg transition-colors duration-300 font-medium text-base" style={{ color: colors.text }}>{children}</a>
-  );
-
-  const FeatureCard = ({ title, description, icon }) => (
-    <div className="bg-primary-dark rounded-xl p-6 flex flex-col items-center text-center shadow-lg transition-transform duration-300 hover:scale-105" style={{ backgroundColor: colors.primary }}>
-      <div className="w-16 h-16 flex items-center justify-center rounded-full mb-4" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})` }}>
-        <span className="text-3xl" role="img" aria-label={title}>{icon}</span>
-      </div>
-      <h3 className="text-xl font-bold mb-2" style={{ color: colors.text }}>{title}</h3>
-      <p className="text-greyText text-sm" style={{ color: colors.greyText }}>{description}</p>
-    </div>
-  );
-
-  const ScoreCard = ({ match }) => (
-    <div className="bg-gray-800 text-white p-4 rounded-lg mb-4">
-      <h4 className="text-lg font-bold">{match.teams?.home?.name} vs {match.teams?.away?.name || match.teams?.visitors?.name}</h4>
-      <p>Score: {match.scores?.home?.points || match.goals?.home} - {match.scores?.away?.points || match.goals?.away}</p>
-      <p>Status: {match.status?.long}</p>
-    </div>
-  );
-
   return (
     <div className="min-h-screen font-sans" style={{ backgroundColor: colors.background }}>
       <header className="py-5 shadow-lg" style={{ backgroundColor: colors.primary }}>
         <nav className="container mx-auto flex justify-between items-center px-4">
           <div className="text-3xl font-extrabold" style={{ color: colors.accent }}>Fanzora</div>
           <div className="hidden md:flex space-x-6">
-            <NavLink to="#home">Home</NavLink>
+            <NavLink to="/">Home</NavLink>
             <NavLink to="#leagues">Leagues</NavLink>
             <NavLink to="#contests">Contests</NavLink>
             <NavLink to="#myteam">My Team</NavLink>
           </div>
-          <button onClick={handleLogin} className="px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 transform active:scale-95" style={{ backgroundColor: colors.accent, color: colors.text, boxShadow: `0 0 15px ${colors.accent}` }}>
-            {user ? 'Welcome, ' + user.name : 'Sign Up / Login'}
-          </button>
+          <NavLink to="/login">
+            <button className="px-6 py-2 rounded-full font-bold text-lg transition-all duration-300 hover:scale-105 transform active:scale-95" style={{ backgroundColor: colors.accent, color: colors.text, boxShadow: `0 0 15px ${colors.accent}` }}>
+              {user ? 'Welcome, ' + user.name : 'Sign Up / Login'}
+            </button>
+          </NavLink>
         </nav>
       </header>
 
-      {/* Move Live Scores First */}
       <section className="py-12 container mx-auto px-4 text-center">
         <h2 className="text-4xl font-bold mb-6" style={{ color: colors.text }}>Choose Sport</h2>
         <select value={sport} onChange={(e) => setSport(e.target.value)} className="p-3 rounded-lg text-black">
@@ -109,7 +123,6 @@ const FanzoraLandingPage = () => {
         {scores.length === 0 ? <p style={{ color: colors.greyText }}>No live games right now.</p> : scores.map((match, index) => <ScoreCard key={index} match={match} />)}
       </section>
 
-      {/* Hero Section After Live Scores */}
       <section className="relative flex items-center justify-center text-center py-24 md:py-36 overflow-hidden" style={{ background: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://placehold.co/1920x1080') center center / cover no-repeat` }}>
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}></div>
         <div className="relative z-10 max-w-4xl px-4">
@@ -125,29 +138,25 @@ const FanzoraLandingPage = () => {
         </div>
       </section>
 
-      <section className="py-12 container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-10" style={{ color: colors.text }}>Create or Join Contests</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 rounded-xl bg-gray-900 text-white">
-            <h3 className="text-2xl font-bold mb-4">Create Contest</h3>
-            <input className="w-full p-2 rounded mb-2 text-black" placeholder="Contest Name" />
-            <input className="w-full p-2 rounded mb-2 text-black" placeholder="Entry Fee ($)" />
-            <button className="bg-green-500 px-4 py-2 rounded text-black font-bold w-full">Create</button>
-          </div>
-          <div className="p-6 rounded-xl bg-gray-900 text-white">
-            <h3 className="text-2xl font-bold mb-4">Join Contest</h3>
-            <input className="w-full p-2 rounded mb-2 text-black" placeholder="Contest Code" />
-            <button className="bg-blue-500 px-4 py-2 rounded text-white font-bold w-full">Join</button>
-          </div>
-        </div>
-      </section>
-
       <footer className="py-8 text-center" style={{ backgroundColor: colors.primary }}>
         <p className="text-greyText text-sm" style={{ color: colors.greyText }}>
           &copy; 2024 Fanzora. All rights reserved.
         </p>
       </footer>
     </div>
+  );
+};
+
+const FanzoraLandingPage = () => {
+  const [user, setUser] = useState(null);
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<FanzoraHome user={user} setUser={setUser} />} />
+        <Route path="/login" element={<LoginPage setUser={setUser} />} />
+      </Routes>
+    </Router>
   );
 };
 
