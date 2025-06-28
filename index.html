@@ -7,22 +7,36 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>⚽ Fanzora</h1>
-    <p>Live Fantasy Sports. Real-Time Action.</p>
-    <button onclick="loadLiveScores()">Load Live Scores</button>
-  </header>
+  <div id="auth-section">
+    <h2>Welcome to Fanzora</h2>
+    <form id="auth-form">
+      <input type="text" id="username" placeholder="Username" required><br>
+      <input type="date" id="birthdate" required><br>
+      <button type="submit">Enter</button>
+    </form>
+    <p id="auth-message"></p>
+  </div>
 
-  <main id="scores-container" class="fade-in">
-    <p>Click the button to load live matches</p>
-  </main>
+  <div id="main-app" style="display: none;">
+    <header>
+      <h1>⚽ Fanzora</h1>
+      <p>Live Fantasy Sports. Real-Time Action.</p>
+      <button onclick="loadLiveScores()">Load Live Scores</button>
+      <button onclick="logout()">Logout</button>
+    </header>
 
-  <footer>
-    <p>Built with ❤️ for sports fans</p>
-  </footer>
+    <main id="scores-container">
+      <p>Click the button to load live matches</p>
+    </main>
+
+    <footer>
+      <p>Built with ❤️ for sports fans</p>
+    </footer>
+  </div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
 
 
