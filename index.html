@@ -4,18 +4,142 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fanzora Fantasy Sports</title>
+
   <style>
-    body { font-family: Arial, sans-serif; background: #121212; color: #eee; padding: 20px; }
-    #auth-section, #main-app { max-width: 600px; margin: auto; }
-    #main-app { display: none; }
-    .score-card { background: #222; padding: 10px; margin: 10px 0; border-radius: 6px; }
-    #leaderboard-section { background: #333; padding: 10px; margin-top: 20px; border-radius: 6px; }
-    #leaderboard-list { list-style-type: none; padding-left: 0; }
-    #leaderboard-list li { padding: 5px 0; border-bottom: 1px solid #444; }
-    button { cursor: pointer; padding: 8px 12px; margin-top: 10px; border: none; border-radius: 4px; background: #00FF7F; color: #000; font-weight: bold; }
-    input, label, select { display: block; margin: 8px 0 4px; }
-    input[type="text"], input[type="date"], select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #222; color: #eee; }
-    #auth-message { color: #f55; }
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #121212;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    #auth-section, #main-app {
+      max-width: 600px;
+      width: 100%;
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+
+    h1, h2 {
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #00ff7f;
+    }
+
+    label {
+      margin-top: 15px;
+      font-weight: 600;
+      color: #aaa;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: none;
+      background: #2a2a2a;
+      color: #eee;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      background: #3c3c3c;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 15px;
+      background: #00ff7f;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #121212;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #00cc66;
+    }
+
+    #scores-container, #leaderboard-section {
+      margin-top: 25px;
+    }
+
+    .score-card {
+      background: #2a2a2a;
+      border-radius: 10px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .score-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(0,255,127,0.7);
+    }
+
+    #leaderboard-section {
+      background: #222;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #00ff7faa;
+    }
+
+    #leaderboard-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #leaderboard-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid #444;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #00ff7f;
+      transition: color 0.3s ease;
+    }
+
+    #leaderboard-list li:hover {
+      color: #00cc66;
+    }
+
+    #auth-message {
+      color: #ff5555;
+      margin-top: 10px;
+      font-weight: 600;
+      min-height: 20px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      #auth-section, #main-app {
+        padding: 20px;
+      }
+
+      button {
+        font-size: 1rem;
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -42,7 +166,6 @@
       <option value="140">La Liga</option>
       <option value="2">Champions League</option>
       <option value="39">Premier League</option>
-      <!-- Add more leagues if you want -->
     </select>
 
     <button onclick="loadLiveScores()">Load Live Scores</button>
@@ -206,8 +329,10 @@
       }
     }
   </script>
+
 </body>
 </html>
+
 
 
 
