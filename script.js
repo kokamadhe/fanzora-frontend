@@ -10,11 +10,10 @@ window.onload = () => {
     const username = document.getElementById("username").value.trim();
     const birthdate = new Date(document.getElementById("birthdate").value);
     const today = new Date();
-    const age = today.getFullYear() - birthdate.getFullYear();
+    let age = today.getFullYear() - birthdate.getFullYear();
     const monthDiff = today.getMonth() - birthdate.getMonth();
     const dayDiff = today.getDate() - birthdate.getDate();
 
-    // adjust age if birthday hasn't occurred yet this year
     if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
       age--;
     }
@@ -39,10 +38,10 @@ function logout() {
   location.reload();
 }
 
-// LOAD LIVE SCORES
+// LOAD LIVE SCORES WITH FANTASY POINTS
 async function loadLiveScores() {
   const container = document.getElementById("scores-container");
-  container.innerHTML = "<p>Loading live matches...</p>";
+  container.innerHTML = "<p>Loading live matches and fantasy points...</p>";
 
   const options = {
     method: 'GET',
@@ -62,19 +61,43 @@ async function loadLiveScores() {
     }
 
     container.innerHTML = '';
-    data.response.forEach(match => {
+
+    for (const match of data.response) {
+      // Fetch player stats for the fixture
+      const statsRes = await fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures/players?fixture=${match.fixture.id}`, options);
+      const statsData = await statsRes.json();
+
+      let homePoints = 0;
+      let awayPoints = 0;
+
+      if (statsData.response) {
+        statsData.response.forEach(player => {
+          player.statistics.forEach(stat => {
+            const goals = stat.goals.total || 0;
+            const assists = stat.goals.assists || 0;
+            const yellow = stat.cards.yellow || 0;
+
+            const points = (goals * 5) + (assists * 3) - (yellow * 1);
+
+            if (player.team.id === match.teams.home.id) homePoints += points;
+            else if (player.team.id === match.teams.away.id) awayPoints += points;
+          });
+        });
+      }
+
       const card = document.createElement("div");
       card.className = "score-card";
       card.innerHTML = `
         <strong>${match.teams.home.name}</strong> ${match.goals.home} - ${match.goals.away} <strong>${match.teams.away.name}</strong><br>
-        <small>${match.league.name} – ${match.fixture.status.short}</small>
+        <small>${match.league.name} – ${match.fixture.status.short}</small><br>
+        <em>Fantasy Points: ${homePoints.toFixed(1)} - ${awayPoints.toFixed(1)}</em>
       `;
       container.appendChild(card);
-    });
-
+    }
   } catch (err) {
     container.innerHTML = `<p>Error loading scores. Try again later.</p>`;
     console.error(err);
   }
 }
+
 
