@@ -2,405 +2,156 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fanzora - Fantasy Sports Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fanzora - Fantasy Sports Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-black text-white font-sans">
+
+  <!-- Header -->
+  <header class="py-4 shadow-lg bg-gray-900">
+    <div class="container mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-green-400">Fanzora</h1>
+      <button id="loginBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Login / Signup</button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="text-center py-20 bg-cover bg-center relative" style="background-image: url('https://placehold.co/1600x800');">
+    <div class="bg-black bg-opacity-60 absolute inset-0"></div>
+    <div class="relative z-10 max-w-3xl mx-auto px-4">
+      <h2 class="text-5xl font-extrabold mb-4 animate-fade-in-up">Unleash Your Inner Football Guru</h2>
+      <p class="text-lg text-gray-300 mb-8 animate-fade-in-up delay-200">Compete in fantasy leagues, build teams, and climb the leaderboards with Fanzora.</p>
+      <button class="bg-green-400 text-black font-bold px-8 py-3 rounded-full animate-pulse">Join the Arena</button>
+    </div>
+  </section>
+
+  <!-- Sport Switch -->
+  <section class="text-center py-10">
+    <label for="sportSelect" class="block mb-2 text-xl font-semibold">Choose Sport</label>
+    <select id="sportSelect" class="p-2 rounded text-black">
+      <option value="football">Football</option>
+      <option value="basketball">Basketball</option>
+    </select>
+  </section>
+
+  <!-- Live Scores -->
+  <section class="container mx-auto px-4 py-8">
+    <h3 class="text-3xl font-bold mb-6">Live Scores</h3>
+    <div id="scoresContainer" class="space-y-4"></div>
+  </section>
+
+  <!-- Leaderboard -->
+  <section class="container mx-auto px-4 py-8">
+    <h3 class="text-3xl font-bold mb-6">Leaderboard</h3>
+    <ul id="leaderboard" class="list-disc pl-6 text-gray-300"></ul>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-6 text-center bg-gray-900 text-gray-400">
+    &copy; 2024 Fanzora. All rights reserved.
+  </footer>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNtb0dULbjcQ7ntivImnOT2lFPkvwkWcE",
+      authDomain: "fanzora-5bb63.firebaseapp.com",
+      projectId: "fanzora-5bb63",
+      storageBucket: "fanzora-5bb63.appspot.com",
+      messagingSenderId: "1022284928533",
+      appId: "1:1022284928533:web:2378215ac39ab6fc33601c",
+      measurementId: "G-K7G16RJHRY"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Login button logic
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const age = prompt('Enter your age:');
+      if (parseInt(age) < 18) {
+        alert('You must be 18 or older to play.');
+        return;
+      }
+      signInAnonymously(auth).then(() => {
+        alert('Signed in anonymously!');
+      });
+    });
+
+    // Load dummy leaderboard data
+    async function loadLeaderboard() {
+      const leaderboard = document.getElementById('leaderboard');
+      leaderboard.innerHTML = '<li>User1 - 100pts</li><li>User2 - 80pts</li>';
+    }
+    loadLeaderboard();
+
+    // Load live scores
+    async function loadScores(sport) {
+      let url = '', headers = {}, apiKey = 'db2d688e15mshc5c4628851de414p19f157jsnbbdea597f1b8';
+      if (sport === 'football') {
+        url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all';
+        headers = {
+          'X-RapidAPI-Key': apiKey,
+          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+        };
+      } else {
+        url = 'https://api-basketball.p.rapidapi.com/games?league=12&season=2024&live=all';
+        headers = {
+          'X-RapidAPI-Key': apiKey,
+          'X-RapidAPI-Host': 'api-basketball.p.rapidapi.com'
+        };
+      }
+      try {
+        const res = await fetch(url, { headers });
+        const data = res.ok ? await res.json() : null;
+        const scoresContainer = document.getElementById('scoresContainer');
+        scoresContainer.innerHTML = '';
+        (data?.response || []).forEach(match => {
+          const home = match.teams?.home?.name || match.teams?.localteam?.name;
+          const away = match.teams?.away?.name || match.teams?.visitorteam?.name;
+          const scoreHome = match.goals?.home ?? match.scores?.home?.points;
+          const scoreAway = match.goals?.away ?? match.scores?.away?.points;
+          const status = match.status?.long || 'Live';
+          scoresContainer.innerHTML += `<div class='bg-gray-800 p-4 rounded'><strong>${home} vs ${away}</strong><br/>Score: ${scoreHome} - ${scoreAway}<br/>Status: ${status}</div>`;
+        });
+      } catch (e) {
+        console.error(e);
+        document.getElementById('scoresContainer').innerHTML = '<p class="text-gray-400">Failed to load scores.</p>';
+      }
+    }
+
+    document.getElementById('sportSelect').addEventListener('change', e => {
+      loadScores(e.target.value);
+    });
+
+    loadScores('football');
+  </script>
+
   <style>
-    /* --- Your original styles with some additions --- */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #000;
-      color: #fff;
+    @keyframes fadeInMoveUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    header {
-      background: #1A1A1A;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    nav a {
-      color: white;
-      margin: 0 1rem;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .hero {
-      background: linear-gradient(rgba(0,0,0,.8), rgba(0,0,0,.8)), url('https://placehold.co/1920x1080') center/cover no-repeat;
-      text-align: center;
-      padding: 6rem 1rem;
-    }
-    .hero h1 {
-      font-size: 3rem;
-      animation: fadeInUp 1s ease forwards;
-    }
-    .hero p {
-      color: #A0A0A0;
-      font-size: 1.2rem;
-      animation: fadeInUp 1.2s ease forwards;
-    }
-    .btn {
-      margin-top: 1.5rem;
-      padding: 1rem 2rem;
-      background: #00FF7F;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      animation: pulse 2s infinite;
-      border-radius: 8px;
-    }
-    .section {
-      padding: 2rem;
-      max-width: 1000px;
-      margin: auto;
-    }
-    .score, .contest, .player {
-      background: #1A1A1A;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 10px;
-    }
-    select, input {
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: none;
-    }
-    footer {
-      text-align: center;
-      padding: 1rem;
-      background: #1A1A1A;
-      color: #A0A0A0;
-    }
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .animate-fade-in-up { animation: fadeInMoveUp 0.8s ease-out forwards; }
+    .animate-fade-in-up.delay-200 { animation-delay: 0.2s; }
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
     @keyframes pulse {
-      0%, 100% {
-        box-shadow: 0 0 20px #00FF7F;
-      }
-      50% {
-        box-shadow: 0 0 40px #00FF7F;
-      }
-    }
-    /* Extra styles */
-    #teamSelection .player {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #leaderboard div {
-      margin: 0.5rem 0;
-    }
-    #userProfile {
-      margin-bottom: 2rem;
+      0%, 100% { box-shadow: 0 0 20px #00FF7F; }
+      50% { box-shadow: 0 0 40px #00FF7F; }
     }
   </style>
-  <script src="https://js.stripe.com/v3/"></script>
-</head>
-<body>
-
-<header>
-  <div style="color:#007BFF; font-size: 1.8rem; font-weight: bold;">Fanzora</div>
-  <nav>
-    <a onclick="showSection('home')">Home</a>
-    <a onclick="showSection('leagues')">Leagues</a>
-    <a onclick="showSection('contests')">Contests</a>
-    <a onclick="showSection('myteam')">My Team</a>
-    <a onclick="showSection('leaderboard')">Leaderboard</a>
-  </nav>
-  <button class="btn" onclick="handleLoginLogout()" id="loginBtn">Sign Up / Login</button>
-</header>
-
-<section class="hero" id="homeSection">
-  <h1>Unleash Your Inner Football Guru</h1>
-  <p>Fanzora: The ultimate fantasy arena to challenge your sports knowledge in real time.</p>
-  <button class="btn" onclick="loadScores()">Join the Arena</button>
-</section>
-
-<section class="section" id="leaguesSection" style="display:none;">
-  <h2>Choose Sport</h2>
-  <select id="sportSelect" onchange="loadScores()">
-    <option value="football">Football</option>
-    <option value="basketball">Basketball</option>
-  </select>
-  <div id="scores">Select a sport and load scores.</div>
-</section>
-
-<section class="section" id="contestsSection" style="display:none;">
-  <h2>Create a Contest</h2>
-  <input type="text" id="contestName" placeholder="Contest Name" />
-  <input type="number" id="entryFee" placeholder="Entry Fee ($)" min="1" />
-  <button class="btn" onclick="createContest()">Create Contest</button>
-  <div id="contestList"></div>
-</section>
-
-<section class="section" id="myteamSection" style="display:none;">
-  <h2>Your Team Selection</h2>
-  <div id="teamSelection"></div>
-  <button class="btn" onclick="saveTeam()">Save Team</button>
-</section>
-
-<section class="section" id="leaderboardSection" style="display:none;">
-  <h2>Leaderboard</h2>
-  <div id="leaderboard"></div>
-</section>
-
-<section class="section" id="userProfile" style="display:none;">
-  <h2>User Profile</h2>
-  <p id="profileName"></p>
-  <p id="profileAge"></p>
-  <button class="btn" onclick="logout()">Logout</button>
-</section>
-
-<footer>
-  &copy; 2024 Fanzora. All rights reserved.
-</footer>
-
-<script>
-// --- User Login & Profile management ---
-let currentUser = JSON.parse(localStorage.getItem('fanzoraUser')) || null;
-const loginBtn = document.getElementById('loginBtn');
-const userProfileSection = document.getElementById('userProfile');
-
-function handleLoginLogout() {
-  if (currentUser) {
-    // Already logged in - show profile
-    showUserProfile();
-  } else {
-    login();
-  }
-}
-
-function login() {
-  const username = prompt("Enter your username:");
-  if (!username) return alert("Username required.");
-
-  const age = prompt("Enter your age:");
-  if (!age || parseInt(age) < 18) {
-    alert("You must be 18 or older to use Fanzora.");
-    return;
-  }
-
-  currentUser = {
-    name: username,
-    age: parseInt(age),
-    fantasyPoints: 0,
-    team: []
-  };
-  localStorage.setItem('fanzoraUser', JSON.stringify(currentUser));
-  loginBtn.textContent = `Welcome, ${currentUser.name}`;
-  alert("Login successful!");
-  showUserProfile();
-}
-
-function logout() {
-  currentUser = null;
-  localStorage.removeItem('fanzoraUser');
-  loginBtn.textContent = "Sign Up / Login";
-  userProfileSection.style.display = 'none';
-  showSection('home');
-}
-
-function showUserProfile() {
-  document.getElementById('profileName').textContent = `Name: ${currentUser.name}`;
-  document.getElementById('profileAge').textContent = `Age: ${currentUser.age}`;
-  userProfileSection.style.display = 'block';
-  showSection('myteam');
-}
-
-// --- Navigation ---
-function showSection(section) {
-  const sections = ['home', 'leagues', 'contests', 'myteam', 'leaderboard'];
-  sections.forEach(s => {
-    document.getElementById(s + 'Section').style.display = s === section ? 'block' : 'none';
-  });
-  userProfileSection.style.display = 'none';
-}
-
-// --- Live Scores ---
-function loadScores() {
-  const sport = document.getElementById('sportSelect').value;
-  const scoresContainer = document.getElementById('scores');
-  scoresContainer.innerHTML = 'Loading...';
-
-  let url = '';
-  let host = '';
-
-  if (sport === 'football') {
-    url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all';
-    host = 'api-football-v1.p.rapidapi.com';
-  } else if (sport === 'basketball') {
-    url = 'https://api-basketball.p.rapidapi.com/games?league=12&season=2024&live=all';
-    host = 'api-basketball.p.rapidapi.com';
-  }
-
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'X-RapidAPI-Key': 'db2d688e15mshc5c4628851de414p19f157jsnbbdea597f1b8',
-      'X-RapidAPI-Host': host
-    }
-  })
-  .then(res => res.ok ? res.json() : Promise.reject('Failed to load'))
-  .then(data => {
-    const matches = data.response || [];
-    if (matches.length === 0) {
-      scoresContainer.innerHTML = '<p>No live games right now.</p>';
-      return;
-    }
-    scoresContainer.innerHTML = matches.map(match => `
-      <div class="score">
-        <strong>${match.teams?.home?.name || match.teams?.localTeam?.name} vs ${match.teams?.away?.name || match.teams?.visitorTeam?.name}</strong><br>
-        Score: ${match.goals?.home ?? match.scores?.home?.points ?? 'N/A'} - ${match.goals?.away ?? match.scores?.away?.points ?? 'N/A'}<br>
-        Fantasy Points: ${Math.floor(Math.random() * 100)}<br>
-        Status: ${match.status?.long || match.status?.description || 'N/A'}
-      </div>
-    `).join('');
-  })
-  .catch(e => {
-    scoresContainer.innerHTML = '<p>Error loading scores.</p>';
-    console.error(e);
-  });
-}
-
-// --- Contest Creation & List ---
-const contests = JSON.parse(localStorage.getItem('fanzoraContests')) || [];
-function createContest() {
-  const name = document.getElementById('contestName').value.trim();
-  const fee = Number(document.getElementById('entryFee').value);
-  if (!name || !fee) return alert("Please enter all fields.");
-  contests.push({ name, fee });
-  localStorage.setItem('fanzoraContests', JSON.stringify(contests));
-  renderContests();
-  alert(`Contest "${name}" created with $${fee} entry fee!`);
-}
-function renderContests() {
-  const list = document.getElementById('contestList');
-  if (contests.length === 0) {
-    list.innerHTML = '<p>No contests created yet.</p>';
-    return;
-  }
-  list.innerHTML = contests.map(c => `<div class="contest"><strong>${c.name}</strong><br>Entry Fee: $${c.fee}</div>`).join('');
-}
-renderContests();
-
-// --- Team Selection ---
-const playersPool = [
-  { id: 1, name: 'Player A', position: 'Forward', fantasyPoints: 0 },
-  { id: 2, name: 'Player B', position: 'Midfielder', fantasyPoints: 0 },
-  { id: 3, name: 'Player C', position: 'Defender', fantasyPoints: 0 },
-  { id: 4, name: 'Player D', position: 'Goalkeeper', fantasyPoints: 0 },
-  { id: 5, name: 'Player E', position: 'Forward', fantasyPoints: 0 },
-  { id: 6, name: 'Player F', position: 'Midfielder', fantasyPoints: 0 },
-];
-const maxTeamSize = 5;
-
-function renderTeamSelection() {
-  const container = document.getElementById('teamSelection');
-  if (!currentUser) {
-    container.innerHTML = '<p>Please login to select your team.</p>';
-    return;
-  }
-  let html = '<p>Select your fantasy team (max 5 players):</p>';
-  playersPool.forEach(p => {
-    const checked = currentUser.team.includes(p.id) ? 'checked' : '';
-    html += `
-      <div class="player">
-        <label>
-          <input type="checkbox" value="${p.id}" ${checked} onchange="togglePlayer(${p.id}, this.checked)" />
-          ${p.name} (${p.position})
-        </label>
-      </div>`;
-  });
-  container.innerHTML = html;
-}
-function togglePlayer(playerId, checked) {
-  if (!currentUser) return alert("Please login first.");
-  if (checked) {
-    if (currentUser.team.length >= maxTeamSize) {
-      alert(`Max team size is ${maxTeamSize}.`);
-      document.querySelector(`#teamSelection input[value='${playerId}']`).checked = false;
-      return;
-    }
-    currentUser.team.push(playerId);
-  } else {
-    currentUser.team = currentUser.team.filter(id => id !== playerId);
-  }
-}
-function saveTeam() {
-  if (!currentUser) return alert("Please login first.");
-  localStorage.setItem('fanzoraUser', JSON.stringify(currentUser));
-  alert("Team saved!");
-  // Optionally update fantasy points randomly for demo:
-  currentUser.fantasyPoints = currentUser.team.length * 10 + Math.floor(Math.random()*50);
-  saveUserAndUpdateLeaderboard();
-}
-
-// --- Leaderboard ---
-function saveUserAndUpdateLeaderboard() {
-  // Save current user fantasy points to leaderboard (localStorage)
-  let leaderboard = JSON.parse(localStorage.getItem('fanzoraLeaderboard')) || [];
-  const existingIndex = leaderboard.findIndex(u => u.name === currentUser.name);
-  if (existingIndex !== -1) leaderboard.splice(existingIndex, 1); // remove old record
-  leaderboard.push({ name: currentUser.name, points: currentUser.fantasyPoints });
-  leaderboard.sort((a,b) => b.points - a.points);
-  localStorage.setItem('fanzoraLeaderboard', JSON.stringify(leaderboard));
-  renderLeaderboard();
-}
-function renderLeaderboard() {
-  const lb = JSON.parse(localStorage.getItem('fanzoraLeaderboard')) || [];
-  const container = document.getElementById('leaderboard');
-  if (lb.length === 0) {
-    container.innerHTML = '<p>No leaderboard data yet.</p>';
-    return;
-  }
-  container.innerHTML = lb.map((user, idx) => `<div>${idx+1}. <strong>${user.name}</strong> - ${user.points} pts</div>`).join('');
-}
-
-// --- Stripe Payment Integration ---
-// Replace with your own Stripe publishable key for real use
-const stripe = Stripe('pk_test_51Mtx...your_test_key_here...');
-
-function payEntryFee(amount) {
-  if (!currentUser) return alert("Please login first.");
-
-  // This example uses Stripe Checkout redirect (test mode only)
-  stripe.redirectToCheckout({
-    lineItems: [{ price: 'price_12345', quantity: 1 }], // Replace with your price ID
-    mode: 'payment',
-    successUrl: window.location.href + '?payment=success',
-    cancelUrl: window.location.href + '?payment=cancel',
-    customerEmail: currentUser.name + '@example.com',
-  }).then(function (result) {
-    if (result.error) {
-      alert(result.error.message);
-    }
-  });
-}
-
-// --- Initialize ---
-if (currentUser) {
-  loginBtn.textContent = `Welcome, ${currentUser.name}`;
-  showUserProfile();
-} else {
-  showSection('home');
-}
-renderTeamSelection();
-renderLeaderboard();
-</script>
 
 </body>
 </html>
+
 
 
 
