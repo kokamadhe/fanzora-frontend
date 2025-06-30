@@ -3,60 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fanzora - Fantasy Sports Platform</title>
+  <title>Fanzora - Fantasy Sports</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-black text-white font-sans">
-
-  <!-- Header -->
-  <header class="py-4 shadow-lg bg-gray-900">
-    <div class="container mx-auto px-4 flex justify-between items-center">
-      <h1 class="text-3xl font-bold text-green-400">Fanzora</h1>
-      <button id="loginBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Login / Signup</button>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <section class="text-center py-20 bg-cover bg-center relative" style="background-image: url('https://placehold.co/1600x800');">
-    <div class="bg-black bg-opacity-60 absolute inset-0"></div>
-    <div class="relative z-10 max-w-3xl mx-auto px-4">
-      <h2 class="text-5xl font-extrabold mb-4 animate-fade-in-up">Unleash Your Inner Football Guru</h2>
-      <p class="text-lg text-gray-300 mb-8 animate-fade-in-up delay-200">Compete in fantasy leagues, build teams, and climb the leaderboards with Fanzora.</p>
-      <button class="bg-green-400 text-black font-bold px-8 py-3 rounded-full animate-pulse">Join the Arena</button>
-    </div>
-  </section>
-
-  <!-- Sport Switch -->
-  <section class="text-center py-10">
-    <label for="sportSelect" class="block mb-2 text-xl font-semibold">Choose Sport</label>
-    <select id="sportSelect" class="p-2 rounded text-black">
-      <option value="football">Football</option>
-      <option value="basketball">Basketball</option>
-    </select>
-  </section>
-
-  <!-- Live Scores -->
-  <section class="container mx-auto px-4 py-8">
-    <h3 class="text-3xl font-bold mb-6">Live Scores</h3>
-    <div id="scoresContainer" class="space-y-4"></div>
-  </section>
-
-  <!-- Leaderboard -->
-  <section class="container mx-auto px-4 py-8">
-    <h3 class="text-3xl font-bold mb-6">Leaderboard</h3>
-    <ul id="leaderboard" class="list-disc pl-6 text-gray-300"></ul>
-  </section>
-
-  <!-- Footer -->
-  <footer class="py-6 text-center bg-gray-900 text-gray-400">
-    &copy; 2024 Fanzora. All rights reserved.
-  </footer>
-
-  <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCNtb0dULbjcQ7ntivImnOT2lFPkvwkWcE",
@@ -72,85 +24,68 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Login button logic
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      const age = prompt('Enter your age:');
-      if (parseInt(age) < 18) {
-        alert('You must be 18 or older to play.');
+    window.handleSignup = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const age = parseInt(document.getElementById("age").value);
+
+      if (age < 18) {
+        alert("You must be 18+ to register.");
         return;
       }
-      signInAnonymously(auth).then(() => {
-        alert('Signed in anonymously!');
-      });
-    });
 
-    // Load dummy leaderboard data
-    async function loadLeaderboard() {
-      const leaderboard = document.getElementById('leaderboard');
-      leaderboard.innerHTML = '<li>User1 - 100pts</li><li>User2 - 80pts</li>';
-    }
-    loadLeaderboard();
-
-    // Load live scores
-    async function loadScores(sport) {
-      let url = '', headers = {}, apiKey = 'db2d688e15mshc5c4628851de414p19f157jsnbbdea597f1b8';
-      if (sport === 'football') {
-        url = 'https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all';
-        headers = {
-          'X-RapidAPI-Key': apiKey,
-          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
-        };
-      } else {
-        url = 'https://api-basketball.p.rapidapi.com/games?league=12&season=2024&live=all';
-        headers = {
-          'X-RapidAPI-Key': apiKey,
-          'X-RapidAPI-Host': 'api-basketball.p.rapidapi.com'
-        };
-      }
       try {
-        const res = await fetch(url, { headers });
-        const data = res.ok ? await res.json() : null;
-        const scoresContainer = document.getElementById('scoresContainer');
-        scoresContainer.innerHTML = '';
-        (data?.response || []).forEach(match => {
-          const home = match.teams?.home?.name || match.teams?.localteam?.name;
-          const away = match.teams?.away?.name || match.teams?.visitorteam?.name;
-          const scoreHome = match.goals?.home ?? match.scores?.home?.points;
-          const scoreAway = match.goals?.away ?? match.scores?.away?.points;
-          const status = match.status?.long || 'Live';
-          scoresContainer.innerHTML += `<div class='bg-gray-800 p-4 rounded'><strong>${home} vs ${away}</strong><br/>Score: ${scoreHome} - ${scoreAway}<br/>Status: ${status}</div>`;
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await addDoc(collection(db, "users"), {
+          uid: userCredential.user.uid,
+          email: userCredential.user.email,
+          age: age
         });
-      } catch (e) {
-        console.error(e);
-        document.getElementById('scoresContainer').innerHTML = '<p class="text-gray-400">Failed to load scores.</p>';
+        alert("Signup successful!");
+      } catch (error) {
+        alert(error.message);
       }
-    }
+    };
 
-    document.getElementById('sportSelect').addEventListener('change', e => {
-      loadScores(e.target.value);
-    });
+    window.handleLogin = async function () {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
 
-    loadScores('football');
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        alert("Login successful: " + userCredential.user.email);
+      } catch (error) {
+        alert(error.message);
+      }
+    };
   </script>
+</head>
+<body class="bg-black text-white font-sans">
+  <header class="p-6 bg-gray-900 text-center text-3xl font-bold text-green-400">Fanzora</header>
 
-  <style>
-    @keyframes fadeInMoveUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in-up { animation: fadeInMoveUp 0.8s ease-out forwards; }
-    .animate-fade-in-up.delay-200 { animation-delay: 0.2s; }
-    .animate-pulse {
-      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 20px #00FF7F; }
-      50% { box-shadow: 0 0 40px #00FF7F; }
-    }
-  </style>
+  <main class="p-4 max-w-xl mx-auto">
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-4">Sign Up</h2>
+      <input id="email" type="email" placeholder="Email" class="block w-full mb-2 p-2 rounded text-black" required />
+      <input id="password" type="password" placeholder="Password" class="block w-full mb-2 p-2 rounded text-black" required />
+      <input id="age" type="number" placeholder="Age" class="block w-full mb-2 p-2 rounded text-black" required />
+      <button onclick="handleSignup()" class="bg-green-500 w-full py-2 rounded hover:bg-green-600 font-bold">Sign Up</button>
+    </section>
 
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-4">Log In</h2>
+      <input id="loginEmail" type="email" placeholder="Email" class="block w-full mb-2 p-2 rounded text-black" required />
+      <input id="loginPassword" type="password" placeholder="Password" class="block w-full mb-2 p-2 rounded text-black" required />
+      <button onclick="handleLogin()" class="bg-blue-500 w-full py-2 rounded hover:bg-blue-600 font-bold">Log In</button>
+    </section>
+
+    <section class="text-center mt-10">
+      <p>&copy; 2025 Fanzora. Fantasy Sports for Real Fans.</p>
+    </section>
+  </main>
 </body>
 </html>
+
 
 
 
